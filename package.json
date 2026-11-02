@@ -14,6 +14,7 @@
     "@heroui/react": "^3.2.7",
     "@heroui/styles": "^3.2.7",
     "bcryptjs": "^3.0.3",
+<<<<<<< HEAD
     "better-auth": "^1.7.15",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -29,18 +30,35 @@
     "react-simple-maps": "^5.0.5",
     "sonner": "^2.0.8",
     "swiper": "^14.4.0",
+=======
+    "better-auth": "^1.7.14",
+    "mongodb": "^6.21.0",
+    "next": "16.4.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-simple-maps": "^5.0.5",
+>>>>>>> f4ff1fe9cf574dfcc571dacea5e699badaf7732a
     "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
+<<<<<<< HEAD
     "@types/cors": "^2.8.19",
     "@types/node": "^20.19.43",
+=======
+    "@types/node": "^20",
+>>>>>>> f4ff1fe9cf574dfcc571dacea5e699badaf7732a
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "daisyui": "^5.7.50",
+<<<<<<< HEAD
     "eslint": "^4.0.0",
     "eslint-config-next": "^0.2.4",
+=======
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+>>>>>>> f4ff1fe9cf574dfcc571dacea5e699badaf7732a
     "tailwindcss": "^4",
     "typescript": "^5"
   }
