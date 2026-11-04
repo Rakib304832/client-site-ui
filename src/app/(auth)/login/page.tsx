@@ -109,7 +109,7 @@ function LoginForm() {
 
         <Button
           type="submit"
-          className="w-full bg-[#BEF452] text-black"
+          className="w-full bg-blue-500 text-black"
           isDisabled={loading}
         >
           {loading ? "Signing in..." : "Sign In"}

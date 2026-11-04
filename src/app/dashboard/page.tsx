@@ -125,8 +125,8 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <main className="mx-auto w-full max-w-3xl px-4 py-10">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
+      <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-10">
+        <div className="break-words rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300 sm:p-6">
           <h1 className="text-xl font-semibold">Dashboard could not load</h1>
           <p className="mt-2 text-sm">{error}</p>
           <button
@@ -147,13 +147,13 @@ export default function DashboardPage() {
   const firstName = (session?.user.name || "there").split(" ")[0];
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:py-10">
+      <header className="flex flex-col gap-5 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+        <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">
             Your StudioSpace
           </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+          <h1 className="mt-2 text-3xl font-bold tracking-tight [overflow-wrap:anywhere] sm:text-4xl">
             Welcome back, {firstName}.
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed opacity-70">
@@ -161,16 +161,16 @@ export default function DashboardPage() {
             next.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex w-full gap-2 sm:w-auto sm:flex-wrap sm:gap-3">
           <Link
             href="/studios"
-            className="rounded-lg border border-current/20 px-4 py-2.5 text-sm font-medium transition hover:border-amber-400"
+            className="flex flex-1 items-center justify-center whitespace-nowrap rounded-lg border border-current/20 px-3 py-2.5 text-sm font-medium transition hover:border-amber-400 sm:flex-none sm:px-4"
           >
             Explore studios
           </Link>
           <Link
             href="/add-studio"
-            className="inline-flex items-center gap-2 rounded-lg bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-amber-300"
+            className="inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-amber-400 px-3 py-2.5 text-sm font-semibold text-black transition hover:bg-amber-300 sm:flex-none sm:px-4"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             Add studio
@@ -178,7 +178,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4 lg:grid-cols-4">
         {[
           {
             label: "Upcoming bookings",
@@ -197,15 +197,15 @@ export default function DashboardPage() {
           return (
             <article
               key={item.label}
-              className="rounded-2xl border border-current/10 bg-white p-5 dark:bg-zinc-900/60"
+              className="min-w-0 rounded-2xl border border-current/10 bg-white p-3 dark:bg-zinc-900/60 sm:p-5"
             >
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-amber-400/15 text-amber-500">
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
-              <p className="mt-4 text-2xl font-bold tracking-tight">
+              <p className="mt-3 break-words text-xl font-bold tracking-tight sm:mt-4 sm:text-2xl">
                 {item.value}
               </p>
-              <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] opacity-60">
+              <p className="mt-1 text-[11px] font-medium uppercase leading-tight tracking-[0.08em] opacity-60 sm:text-xs sm:tracking-[0.12em]">
                 {item.label}
               </p>
             </article>
@@ -213,10 +213,10 @@ export default function DashboardPage() {
         })}
       </section>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <section className="rounded-2xl border border-current/10 bg-white p-5 dark:bg-zinc-900/60 sm:p-6">
-          <div className="flex items-center justify-between gap-3">
-            <div>
+      <div className="mt-6 grid gap-5 sm:mt-8 sm:gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <section className="min-w-0 rounded-2xl border border-current/10 bg-white p-4 dark:bg-zinc-900/60 sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
+            <div className="min-w-0 flex-1">
               <h2 className="text-xl font-semibold">Upcoming bookings</h2>
               <p className="mt-1 text-sm opacity-70">
                 Pending and confirmed requests, soonest first.
@@ -224,7 +224,7 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/my-bookings"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-amber-500 hover:underline"
+              className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-amber-500 hover:underline"
             >
               View all
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -232,7 +232,7 @@ export default function DashboardPage() {
           </div>
 
           {stats.upcoming.length === 0 ? (
-            <div className="mt-6 rounded-xl border border-dashed border-current/20 p-8 text-center">
+            <div className="mt-6 rounded-xl border border-dashed border-current/20 p-5 text-center sm:p-8">
               <Sparkles className="mx-auto h-6 w-6 text-amber-500" aria-hidden="true" />
               <p className="mt-2 font-medium">Nothing on the calendar yet.</p>
               <p className="mx-auto mt-1 max-w-sm text-sm opacity-70">
@@ -248,14 +248,14 @@ export default function DashboardPage() {
           ) : (
             <ul className="mt-5 divide-y divide-current/10">
               {stats.upcoming.slice(0, 5).map((booking) => (
-                <li key={booking._id} className="flex flex-wrap items-center gap-3 py-3">
+                <li key={booking._id} className="flex flex-wrap items-center gap-2 py-3 sm:gap-3">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-400/15 text-amber-500">
                     <CalendarDays className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/studios/${booking.studioId}`}
-                      className="truncate text-sm font-semibold hover:underline"
+                      className="block truncate text-sm font-semibold hover:underline"
                     >
                       {booking.studioTitle}
                     </Link>
@@ -273,9 +273,9 @@ export default function DashboardPage() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-current/10 bg-white p-5 dark:bg-zinc-900/60 sm:p-6">
-          <div className="flex items-center justify-between gap-3">
-            <div>
+        <section className="min-w-0 rounded-2xl border border-current/10 bg-white p-4 dark:bg-zinc-900/60 sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
+            <div className="min-w-0 flex-1">
               <h2 className="text-xl font-semibold">Your listings</h2>
               <p className="mt-1 text-sm opacity-70">
                 The spaces you host right now.
@@ -283,7 +283,7 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/my-listings"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-amber-500 hover:underline"
+              className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-amber-500 hover:underline"
             >
               Manage
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -314,7 +314,7 @@ export default function DashboardPage() {
                   <div className="min-w-0">
                     <Link
                       href={`/studios/${studio._id}`}
-                      className="truncate text-sm font-semibold hover:underline"
+                      className="block truncate text-sm font-semibold hover:underline"
                     >
                       {studio.title}
                     </Link>
