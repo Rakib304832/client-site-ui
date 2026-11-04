@@ -14,6 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import HeroSlider from "@/app/components/home/hero-slider";
+import HowItWorksSection from "@/components/home/how-it-works-section";
 import StudioCard from "@/app/components/studio/StudioCard";
 import { API_URL } from "@/lib/api";
 import type { Studio } from "@/app/types/studio";
@@ -150,6 +151,7 @@ async function FeaturedStudios() {
           >
             Host your space
           </Link>
+
         </div>
       </div>
     );
@@ -166,7 +168,8 @@ async function FeaturedStudios() {
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col">
+    <>
+      <main className="flex flex-1 flex-col">
       <HeroSlider />
 
       <section className="border-b border-current/10 bg-white/60 dark:bg-zinc-950/40">
@@ -401,7 +404,10 @@ export default function Home() {
             </Link>
           </div>
         </div>
+
       </section>
-    </main>
+      </main>
+      <HowItWorksSection />
+    </>
   );
 }
