@@ -42,11 +42,6 @@ export default function SiteHeader() {
   const accountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMenuOpen(false);
-    setAccountOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
     function onPointerDown(event: MouseEvent) {
       if (
         accountRef.current &&
@@ -76,10 +71,15 @@ export default function SiteHeader() {
       ? pathname === "/"
       : pathname === href || pathname.startsWith(`${href}/`);
 
+  const closeMenus = () => {
+    setMenuOpen(false);
+    setAccountOpen(false);
+  };
+
   const signOut = async () => {
     await authClient.signOut();
     toast.success("You have been signed out.");
-    setAccountOpen(false);
+    closeMenus();
     router.push("/");
     router.refresh();
   };
@@ -87,7 +87,12 @@ export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-current/10 bg-white/85 backdrop-blur-xl dark:bg-black/80">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
-        <Link href="/" aria-label="StudioSpace home" className="shrink-0">
+        <Link
+          href="/"
+          aria-label="StudioSpace home"
+          className="shrink-0"
+          onClick={closeMenus}
+        >
           <BrandLogo />
         </Link>
 
@@ -98,6 +103,7 @@ export default function SiteHeader() {
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={closeMenus}
                 className={`rounded-lg px-3 py-2 transition ${
                   active
                     ? "bg-amber-400 font-semibold text-black"
@@ -174,6 +180,7 @@ export default function SiteHeader() {
                           key={item.href}
                           href={item.href}
                           role="menuitem"
+                          onClick={closeMenus}
                           className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition hover:bg-amber-400/15"
                         >
                           <Icon className="h-4 w-4 opacity-70" aria-hidden="true" />
@@ -200,12 +207,14 @@ export default function SiteHeader() {
             <div className="hidden items-center gap-2 sm:flex">
               <Link
                 href="/login"
+                onClick={closeMenus}
                 className="rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-current/5"
               >
                 Log in
               </Link>
               <Link
                 href="/register"
+                onClick={closeMenus}
                 className="rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-amber-300"
               >
                 Sign up
@@ -236,6 +245,7 @@ export default function SiteHeader() {
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={closeMenus}
                 className={`rounded-lg px-3 py-2.5 text-sm ${
                   isActive(link.href)
                     ? "bg-amber-400 font-semibold text-black"
@@ -251,12 +261,14 @@ export default function SiteHeader() {
             <div className="mt-3 flex gap-2 border-t border-current/10 pt-3 sm:hidden">
               <Link
                 href="/login"
+                onClick={closeMenus}
                 className="flex-1 rounded-lg border border-current/20 px-3 py-2 text-center text-sm font-medium"
               >
                 Log in
               </Link>
               <Link
                 href="/register"
+                onClick={closeMenus}
                 className="flex-1 rounded-lg bg-amber-400 px-3 py-2 text-center text-sm font-semibold text-black"
               >
                 Sign up
@@ -270,6 +282,7 @@ export default function SiteHeader() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={closeMenus}
                     className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm hover:bg-current/5"
                   >
                     <Icon className="h-4 w-4 opacity-70" aria-hidden="true" />

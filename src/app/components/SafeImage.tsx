@@ -1,7 +1,7 @@
 "use client";
 
 import Image, { type ImageProps } from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type SafeImageProps = Omit<ImageProps, "src"> & {
   src: string;
@@ -16,11 +16,8 @@ export default function SafeImage({
   alt,
   ...props
 }: SafeImageProps) {
-  const [currentSrc, setCurrentSrc] = useState(src);
-
-  useEffect(() => {
-    setCurrentSrc(src);
-  }, [src]);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const currentSrc = failedSrc === src ? fallbackSrc : src;
 
   return (
     <Image
@@ -28,9 +25,7 @@ export default function SafeImage({
       src={currentSrc}
       alt={alt}
       unoptimized
-      onError={() => {
-        if (currentSrc !== fallbackSrc) setCurrentSrc(fallbackSrc);
-      }}
+      onError={() => setFailedSrc(src)}
     />
   );
 }

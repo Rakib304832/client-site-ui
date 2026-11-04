@@ -1,39 +1,49 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useSyncExternalStore } from "react";
+
 export type Theme = "light" | "dark";
 const STORAGE_KEY = "studiospace-theme";
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "light";
+const THEME_EVENT = "studiospace-theme-change";
 
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved === "light" || saved === "dark") return saved;
+function getThemeSnapshot(): Theme {
+  if (typeof document === "undefined") return "light";
+  return document.documentElement.getAttribute("data-theme") === "dark"
+    ? "dark"
+    : "light";
+}
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+function getServerSnapshot(): Theme {
+  return "light";
+}
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(THEME_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(THEME_EVENT, callback);
+  };
+}
+
+function applyTheme(next: Theme) {
+  document.documentElement.setAttribute("data-theme", next);
+  document.documentElement.classList.toggle("dark", next === "dark");
+  document.documentElement.style.colorScheme = next;
 }
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>("light");
-
-  useEffect(() => {
-    const initial = getInitialTheme();
-    setTheme(initial);
-    applyTheme(initial);
-  }, []);
-
-  function applyTheme(next: Theme) {
-    document.documentElement.setAttribute("data-theme", next);
-    document.documentElement.classList.toggle("dark", next === "dark");
-    document.documentElement.style.colorScheme = next;
-  }
+  const theme = useSyncExternalStore(
+    subscribe,
+    getThemeSnapshot,
+    getServerSnapshot,
+  );
 
   const toggleTheme = useCallback(() => {
-    setTheme((current) => {
-      const next: Theme = current === "light" ? "dark" : "light";
-      localStorage.setItem(STORAGE_KEY, next);
-      applyTheme(next);
-      return next;
-    });
+    const next: Theme = getThemeSnapshot() === "light" ? "dark" : "light";
+    localStorage.setItem(STORAGE_KEY, next);
+    applyTheme(next);
+    window.dispatchEvent(new Event(THEME_EVENT));
   }, []);
 
   return { theme, toggleTheme };
