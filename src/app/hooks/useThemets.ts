@@ -23,6 +23,7 @@ export function useTheme() {
 
   function applyTheme(next: Theme) {
     document.documentElement.setAttribute("data-theme", next);
+    document.documentElement.classList.toggle("dark", next === "dark");
     document.documentElement.style.colorScheme = next;
   }
 
