@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { CalendarDays, RotateCcw, Users } from "lucide-react";
 import { ApiError, apiFetch } from "@/lib/api";
 import type { Booking, BookingStatus } from "@/app/types/studio";
 import SafeImage from "@/app/components/SafeImage";
+import ConfirmDialog from "@/app/components/ui/confirm-dialog";
 
 const STATUS_STYLES: Record<BookingStatus, string> = {
   Pending: "bg-amber-100 text-amber-800 border-amber-300",
@@ -37,6 +39,7 @@ type BookingCardProps = {
   mode: "guest" | "host";
   updating: boolean;
   onStatusChange: (booking: Booking, status: BookingStatus) => void;
+  onRequestCancel: (booking: Booking) => void;
 };
 
 function BookingCard({
@@ -44,6 +47,7 @@ function BookingCard({
   mode,
   updating,
   onStatusChange,
+  onRequestCancel,
 }: BookingCardProps) {
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-current/10 p-4 sm:flex-row">
@@ -73,11 +77,20 @@ function BookingCard({
           <StatusBadge status={booking.status} />
         </div>
 
-        <p className="text-sm">
+        <p className="flex flex-wrap items-center gap-1.5 text-sm">
+          <CalendarDays className="h-3.5 w-3.5 opacity-60" aria-hidden="true" />
           {formatDateTime(booking.startTime)} → {formatDateTime(booking.endTime)}
         </p>
-        <p className="text-sm opacity-70">
-          {booking.hours} hour{booking.hours === 1 ? "" : "s"} ·{" "}
+        <p className="flex flex-wrap items-center gap-1.5 text-sm opacity-70">
+          {booking.hours} hour{booking.hours === 1 ? "" : "s"}
+          {booking.guests ? (
+            <>
+              <span aria-hidden="true">·</span>
+              <Users className="h-3.5 w-3.5" aria-hidden="true" />
+              {booking.guests} guest{booking.guests === 1 ? "" : "s"}
+            </>
+          ) : null}
+          <span aria-hidden="true">·</span>
           {mode === "guest"
             ? `Host: ${booking.ownerEmail}`
             : `Guest: ${booking.userName} (${booking.userEmail})`}
@@ -93,11 +106,22 @@ function BookingCard({
               <button
                 type="button"
                 disabled={updating}
-                onClick={() => onStatusChange(booking, "Cancelled")}
+                onClick={() => onRequestCancel(booking)}
                 className="rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-600 disabled:opacity-60"
               >
-                {updating ? "Updating..." : "Cancel request"}
+                Cancel request
               </button>
+            ) : null}
+
+            {mode === "guest" &&
+            (booking.status === "Completed" || booking.status === "Cancelled") ? (
+              <Link
+                href={`/studios/${booking.studioId}`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-current/20 px-3 py-2 text-sm font-medium transition hover:border-amber-400"
+              >
+                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                Book again
+              </Link>
             ) : null}
 
             {mode === "host" && booking.status === "Pending" ? (
@@ -113,7 +137,7 @@ function BookingCard({
                 <button
                   type="button"
                   disabled={updating}
-                  onClick={() => onStatusChange(booking, "Cancelled")}
+                  onClick={() => onRequestCancel(booking)}
                   className="rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-600 disabled:opacity-60"
                 >
                   Decline
@@ -134,7 +158,7 @@ function BookingCard({
                 <button
                   type="button"
                   disabled={updating}
-                  onClick={() => onStatusChange(booking, "Cancelled")}
+                  onClick={() => onRequestCancel(booking)}
                   className="rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-600 disabled:opacity-60"
                 >
                   Cancel
@@ -156,6 +180,9 @@ export default function MyBookingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"All" | BookingStatus>("All");
+  const [pendingCancel, setPendingCancel] = useState<Booking | null>(null);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -212,7 +239,47 @@ export default function MyBookingsPage() {
     }
   }
 
+  async function confirmCancel() {
+    if (!pendingCancel) return;
+    setCancelling(true);
+    try {
+      await apiFetch(`/api/bookings/${encodeURIComponent(pendingCancel._id)}`, {
+        method: "PATCH",
+        body: { status: "Cancelled" },
+      });
+      toast.success("Booking cancelled.");
+      setPendingCancel(null);
+      setReloadKey((key) => key + 1);
+      router.refresh();
+    } catch (cancelError) {
+      toast.error(
+        cancelError instanceof Error
+          ? cancelError.message
+          : "Could not cancel this booking.",
+      );
+    } finally {
+      setCancelling(false);
+    }
+  }
+
   const totalBookings = guestBookings.length + hostBookings.length;
+  const statusOptions: ("All" | BookingStatus)[] = [
+    "All",
+    "Pending",
+    "Confirmed",
+    "Completed",
+    "Cancelled",
+  ];
+  const matchesFilter = (booking: Booking) =>
+    filter === "All" || booking.status === filter;
+  const filteredGuestBookings = guestBookings.filter(matchesFilter);
+  const filteredHostBookings = hostBookings.filter(matchesFilter);
+  const countFor = (status: "All" | BookingStatus) =>
+    status === "All"
+      ? totalBookings
+      : [...guestBookings, ...hostBookings].filter(
+          (booking) => booking.status === status,
+        ).length;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
@@ -238,6 +305,36 @@ export default function MyBookingsPage() {
           </Link>
         </div>
       </div>
+
+      {!loading && !error && totalBookings > 0 ? (
+        <div className="mb-8 flex flex-wrap gap-2">
+          {statusOptions.map((status) => {
+            const active = filter === status;
+            const count = countFor(status);
+            return (
+              <button
+                key={status}
+                type="button"
+                onClick={() => setFilter(status)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm transition ${
+                  active
+                    ? "border-amber-400 bg-amber-400 font-semibold text-black"
+                    : "border-current/20 hover:border-amber-400"
+                }`}
+              >
+                {status}
+                <span
+                  className={`rounded-full px-1.5 text-xs ${
+                    active ? "bg-black/10" : "bg-current/10"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="space-y-4">
@@ -281,19 +378,22 @@ export default function MyBookingsPage() {
         <div className="space-y-10">
           <section>
             <h2 className="mb-4 text-xl font-semibold">My booking requests</h2>
-            {guestBookings.length === 0 ? (
+            {filteredGuestBookings.length === 0 ? (
               <p className="rounded-xl border border-dashed p-6 text-sm opacity-70">
-                You have not booked a studio yet.
+                {filter === "All"
+                  ? "You have not booked a studio yet."
+                  : `No ${filter.toLowerCase()} booking requests.`}
               </p>
             ) : (
               <div className="space-y-4">
-                {guestBookings.map((booking) => (
+                {filteredGuestBookings.map((booking) => (
                   <BookingCard
                     key={booking._id}
                     booking={booking}
                     mode="guest"
                     updating={updatingId === booking._id}
                     onStatusChange={handleStatusChange}
+                    onRequestCancel={setPendingCancel}
                   />
                 ))}
               </div>
@@ -304,19 +404,22 @@ export default function MyBookingsPage() {
             <h2 className="mb-4 text-xl font-semibold">
               Bookings for my studios
             </h2>
-            {hostBookings.length === 0 ? (
+            {filteredHostBookings.length === 0 ? (
               <p className="rounded-xl border border-dashed p-6 text-sm opacity-70">
-                No guests have booked your studios yet.
+                {filter === "All"
+                  ? "No guests have booked your studios yet."
+                  : `No ${filter.toLowerCase()} bookings for your studios.`}
               </p>
             ) : (
               <div className="space-y-4">
-                {hostBookings.map((booking) => (
+                {filteredHostBookings.map((booking) => (
                   <BookingCard
                     key={booking._id}
                     booking={booking}
                     mode="host"
                     updating={updatingId === booking._id}
                     onStatusChange={handleStatusChange}
+                    onRequestCancel={setPendingCancel}
                   />
                 ))}
               </div>
@@ -324,6 +427,25 @@ export default function MyBookingsPage() {
           </section>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(pendingCancel)}
+        title="Cancel this booking?"
+        description={
+          pendingCancel
+            ? `The request for "${pendingCancel.studioTitle}" on ${formatDateTime(
+                pendingCancel.startTime
+              )} will be marked as cancelled. This cannot be undone.`
+            : "This booking will be marked as cancelled."
+        }
+        confirmLabel="Cancel booking"
+        cancelLabel="Keep booking"
+        loading={cancelling}
+        onConfirm={confirmCancel}
+        onCancel={() => {
+          if (!cancelling) setPendingCancel(null);
+        }}
+      />
     </main>
   );
 }
