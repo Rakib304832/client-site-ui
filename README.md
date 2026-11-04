@@ -92,7 +92,7 @@ The demo account is created by the server seed script. You can also register a n
 
 | Route | Description |
 | --- | --- |
-| `/` | Home page with hero slider, featured studios, categories, booking steps, and host guarantee |
+| `/` | Home page with hero slider, featured studios, categories, booking steps, host guarantee, and the full How It Works and About sections |
 | `/studios` | Explore, search, filter, and sort studios |
 | `/studios/[id]` | Studio details, reviews, and booking |
 | `/studios/edit/[id]` | Edit a listing (protected) |

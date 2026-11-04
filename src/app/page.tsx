@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import HeroSlider from "@/app/components/home/hero-slider";
 import HowItWorksSection from "@/components/home/how-it-works-section";
+import AboutSection from "@/components/home/about-section";
 import StudioCard from "@/app/components/studio/StudioCard";
 import { API_URL } from "@/lib/api";
 import type { Studio } from "@/app/types/studio";
@@ -406,8 +407,10 @@ export default function Home() {
         </div>
 
       </section>
-      </main>
+
       <HowItWorksSection />
+      <AboutSection />
+      </main>
     </>
   );
 }

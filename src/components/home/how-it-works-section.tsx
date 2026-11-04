@@ -119,7 +119,7 @@ const faqs = [
 
 export default function HowItWorksSection() {
   return (
-    <main className="flex flex-1 flex-col">
+    <div className="flex flex-col">
       <section className="relative isolate overflow-hidden border-b border-current/10 bg-zinc-950 py-20 text-white sm:py-24">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.18),transparent_55%)]" />
         <div className="relative mx-auto w-full max-w-7xl px-4">
@@ -326,6 +326,6 @@ export default function HowItWorksSection() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
