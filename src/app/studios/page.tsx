@@ -1,139 +1,71 @@
-import Link from "next/link";
-import type { Studio } from "@/app/types/studio";
 import { Suspense } from "react";
-import SafeImage from "@/app/components/SafeImage";
+import Link from "next/link";
+import { Plus } from "lucide-react";
+import StudiosBrowser from "@/app/components/studio/studios-browser";
 import { API_URL } from "@/lib/api";
+import type { Studio } from "@/app/types/studio";
 
-// The Express server address comes from NEXT_PUBLIC_API_URL with a local fallback.
-const API = API_URL;
-
-// Same category names as the Add Studio form, so filtering matches what hosts saved.
-const CATEGORIES = ["All", "Photo Studio", "Film Stage", "Podcast Lounge", "Music Suite", "Workshop"];
-
-async function getStudios(category: string): Promise<Studio[]> {
-  // "All" means no filter, so we skip the query string entirely.
-  const query = category !== "All" ? `?category=${encodeURIComponent(category)}` : "";
-
-  // no-store makes every visit fetch fresh data, so a newly added studio appears immediately.
-  const res = await fetch(`${API}/api/studios${query}`, { cache: "no-store" });
-  if (!res.ok){
-    console.error("Failed to load studios", res.status, `${API}/api/studios${query}` );
-  throw new Error(`Failed to load studios: ${res.status}`);
-  } 
-  return res.json();
+async function getStudios(): Promise<Studio[]> {
+  const response = await fetch(`${API_URL}/api/studios`, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Failed to load studios: ${response.status}`);
+  }
+  return response.json();
 }
 
-// In Next.js 15, searchParams is a Promise, so it must be awaited before reading.
 async function StudiosContent({
   searchParams,
 }: {
   searchParams: Promise<{ category?: string }>;
 }) {
   const { category } = await searchParams;
-  const active = category ?? "All";
-  const studios = await getStudios(active);
+  const studios = await getStudios();
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10">
+    <main className="mx-auto w-full max-w-7xl px-4 py-10">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Explore Studios</h1>
-          <p className="mt-2 text-sm opacity-70">
-            Find a space for your next shoot, recording, or workshop.
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">
+            The full collection
+          </p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            Explore studios
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed opacity-70">
+            Find a space for your next shoot, recording, workshop, or production.
+            Filter by type, budget, and capacity, then book the hours you need.
           </p>
         </div>
         <Link
           href="/add-studio"
-          className="rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-300"
+          className="inline-flex items-center gap-2 rounded-lg bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-amber-300"
         >
+          <Plus className="h-4 w-4" aria-hidden="true" />
           Host your space
         </Link>
       </header>
 
-      {/* Category chips are plain links, so the selected category lives in the URL
-          and survives a reload or a shared link. */}
-      <p className="mb-4 text-sm opacity-70">
-        {studios.length} {studios.length === 1 ? "studio" : "studios"} available
-        {active !== "All" ? ` in ${active}` : ""}.
+      <StudiosBrowser studios={studios} initialCategory={category} />
+    </main>
+  );
+}
+
+function StudiosSkeleton() {
+  return (
+    <main className="mx-auto w-full max-w-7xl px-4 py-10" aria-busy="true">
+      <p role="status" className="sr-only">
+        Loading studios...
       </p>
-
-      <nav className="mb-8 flex flex-wrap gap-2">
-        {CATEGORIES.map((cat) => {
-          const isActive = cat === active;
-          return (
-            <Link
-              key={cat}
-              href={cat === "All" ? "/studios" : `/studios?category=${encodeURIComponent(cat)}`}
-              className={`rounded-full border px-4 py-1.5 text-sm transition ${
-                isActive
-                  ? "border-amber-400 bg-amber-400 font-semibold text-black"
-                  : "border-current/20 hover:border-amber-400"
-              }`}
-            >
-              {cat}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {studios.length === 0 ? (
-        // Empty state with a CTA, as the spec asks, instead of a blank page.
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed p-12 text-center">
-          <p className="text-lg font-medium">No studios found in this category yet.</p>
-          <Link
-            href="/add-studio"
-            className="rounded-lg bg-amber-400 px-5 py-2.5 font-semibold text-black"
-          >
-            Host Your Space
-          </Link>
-        </div>
-      ) : (
-        // items-stretch plus h-full on each card keeps all cards the same height, as the spec requires.
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {studios.map((studio) => (
-            <article
-              key={studio._id}
-              className="flex h-full flex-col overflow-hidden rounded-2xl border border-current/10"
-            >
-              {/* SafeImage falls back to a local photo if a host image URL breaks. */}
-              <div className="relative aspect-[4/3] w-full">
-                <SafeImage
-                  src={studio.image}
-                  alt={studio.title}
-                  fill
-                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                  className="object-cover"
-                />
-                <span className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1 text-xs text-white">
-                  {studio.category}
-                </span>
-                <span className="absolute right-3 top-3 rounded-full bg-black/70 px-3 py-1 text-xs text-white">
-                  ★ {studio.rating.toFixed(1)}
-                </span>
-              </div>
-
-              <div className="flex flex-1 flex-col gap-2 p-5">
-                <h2 className="text-lg font-semibold">{studio.title}</h2>
-                <p className="text-sm opacity-70">{studio.location}</p>
-
-                {/* mt-auto pushes the price and button to the bottom, so cards align even with different text lengths. */}
-                <div className="mt-auto flex items-center justify-between pt-4">
-                  <p className="text-xl font-bold text-amber-400">
-                    ${studio.hourlyRate}
-                    <span className="text-sm font-normal opacity-70"> / hr</span>
-                  </p>
-                  <Link
-                    href={`/studios/${studio._id}`}
-                    className="rounded-lg border border-current/30 px-4 py-2 text-sm font-medium hover:border-amber-400"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+      <div className="mb-8 h-10 w-64 animate-pulse rounded-lg bg-current/10" />
+      <div className="mb-8 h-40 animate-pulse rounded-2xl bg-current/5" />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="aspect-[4/3] animate-pulse rounded-2xl bg-current/10"
+          />
+        ))}
+      </div>
     </main>
   );
 }
@@ -144,15 +76,7 @@ export default function StudiosPage({
   searchParams: Promise<{ category?: string }>;
 }) {
   return (
-    <Suspense
-      fallback={
-        <main className="mx-auto max-w-7xl px-4 py-10" aria-busy="true">
-          <p role="status" className="text-sm opacity-70">
-            Loading studios...
-          </p>
-        </main>
-      }
-    >
+    <Suspense fallback={<StudiosSkeleton />}>
       <StudiosContent searchParams={searchParams} />
     </Suspense>
   );
