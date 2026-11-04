@@ -27,7 +27,7 @@ const slides = [
       "Sound stages, lighting rigs, and production rooms for crews that need space, power, and a calm place to make the next frame.",
     image: "/studios/studio-film.jpg",
     primary: { href: "/studios?category=Film%20Stage", label: "Browse film stages" },
-    secondary: { href: "/how-it-works", label: "How booking works" },
+    secondary: { href: "/#how-it-works", label: "How booking works" },
   },
   {
     eyebrow: "Rooms for voices and sound",
@@ -45,7 +45,7 @@ const slides = [
 
 export default function HeroSlider() {
   return (
-    <section className="relative isolate overflow-hidden bg-zinc-950 text-white">
+    <section id="home" className="relative isolate overflow-hidden bg-zinc-950 text-white">
       <Swiper
         modules={[Autoplay, Navigation, Pagination]}
         autoplay={{ delay: 6500, disableOnInteraction: false }}

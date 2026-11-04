@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import SiteFooter from "./components/site-footer";
 import SiteHeader from "./components/site-header";
+import { ActiveSectionProvider } from "@/app/components/active-section-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,17 +39,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
-        <Suspense
-          fallback={
-            <header
-              className="h-[65px] border-b border-current/10"
-              aria-hidden="true"
-            />
-          }
-        >
-          <SiteHeader />
-        </Suspense>
-        {children}
+        <ActiveSectionProvider>
+          <Suspense
+            fallback={
+              <header
+                className="h-[65px] border-b border-current/10"
+                aria-hidden="true"
+              />
+            }
+          >
+            <SiteHeader />
+          </Suspense>
+          {children}
+        </ActiveSectionProvider>
         <Suspense fallback={null}>
           <SiteFooter />
         </Suspense>

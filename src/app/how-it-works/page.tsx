@@ -1,9 +1,5 @@
-import HowItWorksSection from "@/components/home/how-it-works-section";
+import { permanentRedirect } from "next/navigation";
 
 export default function HowItWorksPage() {
-  return (
-    <main className="flex flex-1 flex-col">
-      <HowItWorksSection />
-    </main>
-  );
+  permanentRedirect("/#how-it-works");
 }

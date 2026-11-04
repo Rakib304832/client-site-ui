@@ -37,7 +37,7 @@ const values = [
 
 export default function AboutSection() {
   return (
-    <div className="flex flex-col">
+    <section id="about" className="flex flex-col">
       <section className="relative isolate overflow-hidden border-b border-current/10 bg-zinc-950 py-20 text-white sm:py-24">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(251,191,36,0.2),transparent_55%)]" />
         <div className="relative mx-auto w-full max-w-7xl px-4">
@@ -61,7 +61,7 @@ export default function AboutSection() {
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
             <Link
-              href="/how-it-works"
+              href="/#how-it-works"
               className="rounded-xl border border-white/30 px-6 py-3 font-semibold transition hover:bg-white/10"
             >
               How it works
@@ -252,6 +252,6 @@ export default function AboutSection() {
           </div>
         </div>
       </section>
-    </div>
+    </section>
   );
 }

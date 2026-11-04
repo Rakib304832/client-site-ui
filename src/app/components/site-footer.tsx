@@ -9,10 +9,10 @@ import BrandLogo from "@/app/components/brand-logo";
 import { STUDIO_CATEGORIES } from "@/app/types/studio";
 
 const quickLinks = [
-  { href: "/", label: "Home" },
+  { href: "/#home", label: "Home" },
   { href: "/studios", label: "Explore Studios" },
-  { href: "/how-it-works", label: "How It Works" },
-  { href: "/about", label: "About Us" },
+  { href: "/#how-it-works", label: "How It Works" },
+  { href: "/#about", label: "About Us" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/my-bookings", label: "My Bookings" },
 ];
@@ -196,13 +196,13 @@ export default function SiteFooter() {
         <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
           <p>© StudioSpace. All rights reserved.</p>
           <div className="flex flex-wrap gap-4">
-            <Link href="/about#terms" className="transition hover:text-amber-400">
+            <Link href="/#about" className="transition hover:text-amber-400">
               Terms of service
             </Link>
-            <Link href="/about#privacy" className="transition hover:text-amber-400">
+            <Link href="/#about" className="transition hover:text-amber-400">
               Privacy policy
             </Link>
-            <Link href="/how-it-works#support" className="transition hover:text-amber-400">
+            <Link href="/#how-it-works" className="transition hover:text-amber-400">
               Support
             </Link>
           </div>

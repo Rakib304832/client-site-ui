@@ -1,9 +1,5 @@
-import AboutSection from "@/components/home/about-section";
+import { permanentRedirect } from "next/navigation";
 
 export default function AboutPage() {
-  return (
-    <main className="flex flex-1 flex-col">
-      <AboutSection />
-    </main>
-  );
+  permanentRedirect("/#about");
 }

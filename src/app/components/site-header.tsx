@@ -17,13 +17,14 @@ import {
 import BrandLogo from "@/app/components/brand-logo";
 import SafeImage from "@/app/components/SafeImage";
 import ThemeToggle from "@/app/components/theme-toggle";
+import { useActiveSection } from "@/app/components/active-section-context";
 import { authClient } from "@/lib/auth-client";
 
 const links = [
-  { href: "/", label: "Home" },
+  { href: "/#home", label: "Home" },
   { href: "/studios", label: "Explore Studios" },
-  { href: "/how-it-works", label: "How It Works" },
-  { href: "/about", label: "About Us" },
+  { href: "/#how-it-works", label: "How It Works" },
+  { href: "/#about", label: "About Us" },
 ];
 
 const accountLinks = [
@@ -37,6 +38,7 @@ export default function SiteHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
+  const { activeSection } = useActiveSection();
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
@@ -66,10 +68,18 @@ export default function SiteHeader() {
 
   if (pathname === "/login" || pathname === "/register") return null;
 
-  const isActive = (href: string) =>
-    href === "/"
-      ? pathname === "/"
-      : pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => {
+    if (href === "/#home") {
+      return pathname === "/" && (activeSection === "" || activeSection === "home");
+    }
+    if (href === "/#how-it-works") {
+      return pathname === "/" && activeSection === "how-it-works";
+    }
+    if (href === "/#about") {
+      return pathname === "/" && activeSection === "about";
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   const closeMenus = () => {
     setMenuOpen(false);

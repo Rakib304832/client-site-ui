@@ -37,6 +37,10 @@ html {
   scroll-behavior: smooth;
 }
 
+section[id] {
+  scroll-margin-top: 84px; /* offset for the sticky navbar */
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

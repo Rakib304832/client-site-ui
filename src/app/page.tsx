@@ -16,6 +16,7 @@ import {
 import HeroSlider from "@/app/components/home/hero-slider";
 import HowItWorksSection from "@/components/home/how-it-works-section";
 import AboutSection from "@/components/home/about-section";
+import ActiveSectionTracker from "@/app/components/active-section-tracker";
 import StudioCard from "@/app/components/studio/StudioCard";
 import { API_URL } from "@/lib/api";
 import type { Studio } from "@/app/types/studio";
@@ -226,7 +227,7 @@ export default function Home() {
         </Suspense>
       </section>
 
-      <section className="border-y border-current/10 bg-white/60 py-16 dark:bg-zinc-950/40 sm:py-20">
+      <section id="explore" className="border-y border-current/10 bg-white/60 py-16 dark:bg-zinc-950/40 sm:py-20">
         <div className="mx-auto w-full max-w-7xl px-4">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -410,6 +411,7 @@ export default function Home() {
 
       <HowItWorksSection />
       <AboutSection />
+      <ActiveSectionTracker />
       </main>
     </>
   );
