@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@heroui/react";
+import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
 export function GoogleAuthButton({
@@ -28,10 +29,16 @@ export function GoogleAuthButton({
       });
 
       if (signInError) {
-        setError(signInError.message ?? "Google sign-in failed. Please try again.");
+        const message =
+          signInError.message ?? "Google sign-in failed. Please try again.";
+        setError(message);
+        toast.error(message);
       }
     } catch {
-      setError("Google sign-in is unavailable. Check your OAuth configuration and try again.");
+      const message =
+        "Google sign-in is unavailable. Check your OAuth configuration and try again.";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -49,7 +56,7 @@ export function GoogleAuthButton({
         {loading ? "Connecting to Google..." : label}
       </Button>
       {error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {error}
         </p>
       )}

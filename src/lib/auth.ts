@@ -25,7 +25,7 @@ export const auth = betterAuth({
   secret,
   baseURL,
   trustedOrigins: [baseURL, "http://localhost:3001"],
-  emailAndPassword: { enabled: true, minPasswordLength: 8 },
+  emailAndPassword: { enabled: true, minPasswordLength: 6 },
   account: {
     accountLinking: {
       enabled: true,
