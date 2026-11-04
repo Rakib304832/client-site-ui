@@ -1,5 +1,15 @@
 // Shape of one studio, exactly as the Express server returns it.
 // Keeping it in one file means every page uses the same definition.
+export type Review = {
+  _id?: string;
+  userId?: string;
+  userName: string;
+  userPhoto?: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+};
+
 export type Studio = {
   _id: string;
   title: string;
@@ -20,6 +30,7 @@ export type Studio = {
   ownerPhoto: string;
   createdAt: string;
   updatedAt?: string;
+  reviews?: Review[];
 };
 
 export type BookingStatus = "Pending" | "Confirmed" | "Completed" | "Cancelled";
@@ -38,6 +49,7 @@ export type Booking = {
   startTime: string;
   endTime: string;
   hours: number;
+  guests?: number;
   totalPrice: number;
   status: BookingStatus;
   createdAt: string;

@@ -62,7 +62,7 @@ function EditStudioPageContent({
         location: values.location.trim(),
         image: values.image.trim(),
         overview: values.overview.trim(),
-        amenities: values.amenities.split(",").map((item) => item.trim()).filter(Boolean),
+        amenities: values.amenities,
       },
     });
     toast.success("Studio updated successfully.");
