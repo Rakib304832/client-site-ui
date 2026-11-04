@@ -17,8 +17,8 @@ async function getStudios(category: string): Promise<Studio[]> {
   // no-store makes every visit fetch fresh data, so a newly added studio appears immediately.
   const res = await fetch(`${API}/api/studios${query}`, { cache: "no-store" });
   if (!res.ok){
-    console.error("Failed to load studios");
-  throw new Error("Failed to load studios");
+    console.error("Failed to load studios", res.status, `${API}/api/studios${query}` );
+  throw new Error(`Failed to load studios: ${res.status}`);
   } 
   return res.json();
 }
