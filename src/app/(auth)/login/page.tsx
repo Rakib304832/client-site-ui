@@ -12,6 +12,8 @@ function LoginForm() {
   const router = useRouter(); 
   const searchParams = useSearchParams(); 
   const from = getSafePath(searchParams.get("from"));
+  const oauthError = searchParams.get("error");
+  const oauthErrorDescription = searchParams.get("error_description");
   const [loading, setLoading] = useState(false); 
   const [serverError, setServerError] = useState<string | null>(null); 
 
@@ -68,6 +70,11 @@ function LoginForm() {
         </TextField> 
 
         {serverError && <p className="text-sm text-red-600">{serverError}</p>} 
+        {!serverError && oauthError && (
+          <p className="text-sm text-red-600">
+            {oauthErrorDescription ?? `Google sign-in failed (${oauthError}).`}
+          </p>
+        )}
 
         <Button type="submit" className="w-full bg-[#BEF452] text-black" isDisabled={loading}> 
           {loading ? "Signing in..." : "Sign In"} 

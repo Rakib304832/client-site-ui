@@ -1,29 +1,27 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import type { Studio } from "@/app/types/studio";
 import GalleryCarousel from "@/app/components/studio/GalleryCarousel";
 import BookWorkspaceButton from "@/app/components/studio/booking/BookWorkspaceButton";
-
-
-const API = process.env.NEXT_PUBLIC_API_URL;
+import SafeImage from "@/app/components/SafeImage";
+import { API_URL } from "@/lib/api";
 
 async function getStudio(id: string): Promise<Studio | null> {
-  const res = await fetch("http://localhost:5000/api/studios", { cache: "no-store" });
+  const res = await fetch(`${API_URL}/api/studios/${encodeURIComponent(id)}`, {
+    cache: "no-store",
+  });
 
-  // A 404 from the server means this studio does not exist, so we show the not-found page.
   if (res.status === 404) return null;
   if (!res.ok) throw new Error("Failed to load studio");
+
   return res.json();
 }
 
-export default async function StudioDetailsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+async function StudioDetails({ id }: { id: string }) {
   const studio = await getStudio(id);
 
-  // notFound() renders app/not-found.tsx and sets a real 404 status code for search engines.
+  // With streamed rendering, notFound() renders the not-found UI and marks the response noindex.
   if (!studio) notFound();
 
   // Gallery falls back to the main image, so the carousel never receives an empty list.
@@ -31,6 +29,13 @@ export default async function StudioDetailsPage({
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
+      <Link
+        href="/studios"
+        className="mb-6 inline-flex text-sm font-medium underline opacity-70 hover:opacity-100"
+      >
+        ← Back to all studios
+      </Link>
+
       <div className="grid gap-10 lg:grid-cols-2">
         {/* Gallery carousel is a client component because it needs Swiper in the browser. */}
         <GalleryCarousel images={gallery} title={studio.title} />
@@ -70,9 +75,11 @@ export default async function StudioDetailsPage({
           </div>
 
           <div className="flex items-center gap-4 rounded-xl border border-current/10 p-4">
-            <img
-              src={studio.ownerPhoto}
+            <SafeImage
+              src={studio.ownerPhoto || "/studios/fallback.jpg"}
               alt={studio.ownerName}
+              width={48}
+              height={48}
               className="h-12 w-12 rounded-full object-cover"
             />
             <div>
@@ -98,5 +105,25 @@ export default async function StudioDetailsPage({
         </div>
       </section>
     </main>
+  );
+}
+
+export default async function StudioDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  return (
+    <Suspense
+      fallback={
+        <p role="status" className="mx-auto max-w-6xl px-4 py-10">
+          Loading studio details...
+        </p>
+       }
+    >
+      <StudioDetails id={id} />
+    </Suspense>
   );
 }

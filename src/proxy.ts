@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server"
-import { NextRequest } from "next/server"
-import { getSessionCookie } from "better-auth/cookies"
+import { getSessionCookie } from "better-auth/cookies";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export function porxy(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
 
   if (!sessionCookie) {
@@ -10,13 +10,13 @@ export function porxy(request: NextRequest) {
     loginUrl.searchParams.set("from", request.nextUrl.pathname + request.nextUrl.search);
     return NextResponse.redirect(loginUrl);
   }
-  return NextResponse.next()
+  return NextResponse.next();
 }
 export const config = {
-  matcher:[
+  matcher: [
     "/add-studio",
-    "/my-listings"
-    "/studios/edit/:path*"
+    "/my-listings",
+    "/studios/edit/:path*",
     "/my-bookings"
   ],
 };

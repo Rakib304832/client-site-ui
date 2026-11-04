@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Nested create-next-app copy that is not part of this app:
+    "client-side1/**",
+    "node_modules/**",
   ]),
 ]);
 

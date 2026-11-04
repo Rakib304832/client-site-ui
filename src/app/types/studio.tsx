@@ -14,8 +14,40 @@ export type Studio = {
   gallery: string[];
   amenities: string[];
   overview: string;
+  ownerId?: string;
   ownerName: string;
   ownerEmail: string;
   ownerPhoto: string;
   createdAt: string;
+  updatedAt?: string;
 };
+
+export type BookingStatus = "Pending" | "Confirmed" | "Completed" | "Cancelled";
+
+export type Booking = {
+  _id: string;
+  studioId: string;
+  studioTitle: string;
+  studioImage: string;
+  studioCategory: string;
+  studioLocation: string;
+  ownerEmail: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  startTime: string;
+  endTime: string;
+  hours: number;
+  totalPrice: number;
+  status: BookingStatus;
+  createdAt: string;
+  updatedAt?: string;
+};
+
+export const STUDIO_CATEGORIES = [
+  "Photo Studio",
+  "Film Stage",
+  "Podcast Lounge",
+  "Music Suite",
+  "Workshop",
+] as const;

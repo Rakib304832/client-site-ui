@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { Studio } from "@/app/types/studio";
+import { Suspense } from "react";
+import SafeImage from "@/app/components/SafeImage";
+import { API_URL } from "@/lib/api";
 
-// The Express server address. NEXT_PUBLIC_ is needed only if the browser reads it,
-// and it is harmless here since it contains no secret.
-const API = process.env.NEXT_PUBLIC_API_URL;
+// The Express server address comes from NEXT_PUBLIC_API_URL with a local fallback.
+const API = API_URL;
 
 // Same category names as the Add Studio form, so filtering matches what hosts saved.
 const CATEGORIES = ["All", "Photo Studio", "Film Stage", "Podcast Lounge", "Music Suite", "Workshop"];
@@ -14,12 +16,15 @@ async function getStudios(category: string): Promise<Studio[]> {
 
   // no-store makes every visit fetch fresh data, so a newly added studio appears immediately.
   const res = await fetch(`${API}/api/studios${query}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to load studios");
+  if (!res.ok){
+    console.error("Failed to load studios");
+  throw new Error("Failed to load studios");
+  } 
   return res.json();
 }
 
 // In Next.js 15, searchParams is a Promise, so it must be awaited before reading.
-export default async function StudiosPage({
+async function StudiosContent({
   searchParams,
 }: {
   searchParams: Promise<{ category?: string }>;
@@ -30,15 +35,28 @@ export default async function StudiosPage({
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold">Explore Studios</h1>
-        <p className="mt-2 text-sm opacity-70">
-          Find a space for your next shoot, recording, or workshop.
-        </p>
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Explore Studios</h1>
+          <p className="mt-2 text-sm opacity-70">
+            Find a space for your next shoot, recording, or workshop.
+          </p>
+        </div>
+        <Link
+          href="/add-studio"
+          className="rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-300"
+        >
+          Host your space
+        </Link>
       </header>
 
       {/* Category chips are plain links, so the selected category lives in the URL
           and survives a reload or a shared link. */}
+      <p className="mb-4 text-sm opacity-70">
+        {studios.length} {studios.length === 1 ? "studio" : "studios"} available
+        {active !== "All" ? ` in ${active}` : ""}.
+      </p>
+
       <nav className="mb-8 flex flex-wrap gap-2">
         {CATEGORIES.map((cat) => {
           const isActive = cat === active;
@@ -77,13 +95,14 @@ export default async function StudiosPage({
               key={studio._id}
               className="flex h-full flex-col overflow-hidden rounded-2xl border border-current/10"
             >
-              {/* A plain img tag is used because imgbb hosts are not whitelisted in next.config,
-                  so next/image would need extra setup for the same result. */}
+              {/* SafeImage falls back to a local photo if a host image URL breaks. */}
               <div className="relative aspect-[4/3] w-full">
-                <img
+                <SafeImage
                   src={studio.image}
                   alt={studio.title}
-                  className="h-full w-full object-cover"
+                  fill
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover"
                 />
                 <span className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1 text-xs text-white">
                   {studio.category}
@@ -116,5 +135,25 @@ export default async function StudiosPage({
         </div>
       )}
     </main>
+  );
+}
+
+export default function StudiosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto max-w-7xl px-4 py-10" aria-busy="true">
+          <p role="status" className="text-sm opacity-70">
+            Loading studios...
+          </p>
+        </main>
+      }
+    >
+      <StudiosContent searchParams={searchParams} />
+    </Suspense>
   );
 }

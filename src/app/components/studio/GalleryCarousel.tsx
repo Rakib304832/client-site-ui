@@ -2,6 +2,7 @@
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
+import SafeImage from "@/app/components/SafeImage";
 
 // Swiper's base styles. Without these the slides stack vertically instead of sliding.
 import "swiper/css";
@@ -27,12 +28,14 @@ export default function GalleryCarousel({ images, title }: Props) {
         className="aspect-[4/3] w-full"
       >
         {images.map((src, index) => (
-          <SwiperSlide key={`${src}-${index}`}>
-            <img
+          <SwiperSlide key={`${src}-${index}`} className="relative">
+            <SafeImage
               src={src}
               // Each slide gets a numbered alt text, so screen readers know which image is which.
               alt={`${title} photo ${index + 1}`}
-              className="h-full w-full object-cover"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
             />
           </SwiperSlide>
         ))}
