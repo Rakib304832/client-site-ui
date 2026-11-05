@@ -24,10 +24,12 @@ export async function apiFetch<T>(
   options: ApiFetchOptions = {},
 ): Promise<T> {
   const { body, headers, ...rest } = options;
+  const backendPath = path.startsWith("/") ? path : `/${path}`;
+  const routePath = backendPath.replace(/^\/api(?=\/|$)/, "");
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`/api/backend${routePath}`, {
     ...rest,
-    credentials: "include",
+    credentials: "same-origin",
     headers: {
       ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
       ...headers,

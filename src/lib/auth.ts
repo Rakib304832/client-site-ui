@@ -23,6 +23,9 @@ export const auth = betterAuth({
   secret,
   baseURL,
   trustedOrigins: [baseURL],
+  advanced: {
+    useSecureCookies: process.env.NODE_ENV === "production",
+  },
   emailAndPassword: { enabled: true, minPasswordLength: 6 },
   account: {
     accountLinking: {
