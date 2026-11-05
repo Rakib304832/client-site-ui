@@ -269,7 +269,11 @@ export default function StudiosBrowser({
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((studio, index) => (
-            <StudioCard key={studio._id} studio={studio} priority={index < 3} />
+            <StudioCard
+              key={studio._id ?? `${studio.title}-${studio.location}-${index}`}
+              studio={studio}
+              priority={index < 3}
+            />
           ))}
         </div>
       )}

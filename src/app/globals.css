@@ -99,6 +99,35 @@ body {
   background: #fbbf24;
 }
 
+/* Favorite heart animation */
+.favorite-heart {
+  transition: transform 0.15s ease, fill 0.15s ease, stroke 0.15s ease;
+}
+.favorite-heart.liked {
+  fill: #ef4444;
+  stroke: #ef4444;
+  transform: scale(1.25);
+}
+.favorite-heart:not(.liked):active {
+  transform: scale(0.9);
+}
+
+/* Pulsing favorite button hint */
+@keyframes favorite-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+.favorite-hint {
+  animation: favorite-pulse 2.5s ease-in-out infinite;
+}
+
 /* Dark-mode compatibility for utility classes used by older screens. */
 [data-theme="dark"] .bg-white {
   background-color: var(--surface);

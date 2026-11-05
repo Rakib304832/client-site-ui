@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import SiteFooter from "./components/site-footer";
 import SiteHeader from "./components/site-header";
+import ScrollToTop from "./components/ui/scroll-to-top";
 import { ActiveSectionProvider } from "@/app/components/active-section-context";
 import "./globals.css";
 
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </Suspense>
           {children}
         </ActiveSectionProvider>
+        <ScrollToTop />
         <Suspense fallback={null}>
           <SiteFooter />
         </Suspense>

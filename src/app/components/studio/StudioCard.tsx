@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, MapPin, Star } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Heart, MapPin, Star } from "lucide-react";
 import SafeImage from "@/app/components/SafeImage";
 import type { Studio } from "@/app/types/studio";
 
@@ -9,6 +10,12 @@ type StudioCardProps = {
 };
 
 export default function StudioCard({ studio, priority = false }: StudioCardProps) {
+  const [favorited, setFavorited] = useState(false);
+
+  function toggleFavorite() {
+    setFavorited((prev) => !prev);
+  }
+
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-current/10 bg-white transition hover:-translate-y-0.5 hover:border-amber-400/70 hover:shadow-lg dark:bg-zinc-900/60">
       <div className="relative aspect-[4/3] w-full overflow-hidden">
@@ -27,6 +34,31 @@ export default function StudioCard({ studio, priority = false }: StudioCardProps
           <Star className="h-3 w-3 fill-amber-400 text-amber-400" aria-hidden="true" />
           {studio.rating > 0 ? studio.rating.toFixed(1) : "New"}
         </span>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            toggleFavorite();
+          }}
+          aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+          className={`absolute left-1/2 -bottom-8 z-20 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center transition duration-300 group-hover:bottom-3 backdrop-blur-sm shadow-sm ${
+            favorited
+              ? "text-red-500"
+              : "text-zinc-700 hover:text-amber-600 border border-current/20"
+          }`}
+        >
+          <Heart
+            className={`h-5 w-5 favorite-heart ${favorited ? "liked" : ""}`}
+            strokeWidth={favorited ? 0 : 2}
+            fill={favorited ? "currentColor" : "none"}
+            aria-hidden="true"
+          />
+          {favorited && (
+            <span className="absolute -top-6 left-1/2 -translate-x-1/2 z-10 px-2 py-0.5 rounded-full bg-amber-400 text-[10px] font-semibold text-black whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100">
+              Saved
+            </span>
+          )}
+        </button>
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-5">

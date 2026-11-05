@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -18,6 +21,7 @@ import HowItWorksSection from "@/components/home/how-it-works-section";
 import AboutSection from "@/components/home/about-section";
 import ActiveSectionTracker from "@/app/components/active-section-tracker";
 import StudioCard from "@/app/components/studio/StudioCard";
+import AnimatedCounter from "@/app/components/ui/animated-counter";
 import { API_URL } from "@/lib/api";
 import type { Studio } from "@/app/types/studio";
 
@@ -128,17 +132,25 @@ function FeaturedSkeleton() {
   );
 }
 
-async function FeaturedStudios() {
-  const studios = await getFeaturedStudios();
+function FeaturedStudios({ allStudios }: { allStudios: Studio[] }) {
+  const [activeCategory, setActiveCategory] = useState("All");
 
-  if (studios.length === 0) {
+  const filtered = useMemo(() => {
+    if (activeCategory === "All") return allStudios;
+    return allStudios.filter((studio) => studio.category === activeCategory);
+  }, [allStudios, activeCategory]);
+
+  const categoryChips = ["All", ...categories.map((c) => c.name)];
+
+  if (filtered.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-current/20 p-10 text-center">
         <Sparkles className="mx-auto h-7 w-7 text-amber-500" aria-hidden="true" />
-        <p className="mt-3 text-lg font-semibold">New spaces are on the way.</p>
+        <p className="mt-3 text-lg font-semibold">
+          No studios in {activeCategory.toLowerCase()} yet.
+        </p>
         <p className="mx-auto mt-1 max-w-md text-sm opacity-70">
-          The first host listings will appear here. In the meantime, browse every
-          space or publish your own studio.
+          Browse another category or publish your own space.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Link
@@ -153,266 +165,294 @@ async function FeaturedStudios() {
           >
             Host your space
           </Link>
-
         </div>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {studios.map((studio, index) => (
-        <StudioCard key={studio._id} studio={studio} priority={index < 3} />
-      ))}
-    </div>
+    <>
+      <div className="mb-8 flex flex-wrap items-center gap-3">
+        {categoryChips.map((chip) => {
+          const active = chip === activeCategory;
+          return (
+            <button
+              key={chip}
+              type="button"
+              onClick={() => setActiveCategory(chip)}
+              className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
+                active
+                  ? "border-amber-400 bg-amber-400 text-black"
+                  : "border-current/20 text-zinc-500 hover:border-amber-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              {chip}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((studio, index) => (
+          <StudioCard key={studio._id} studio={studio} priority={index < 3} />
+        ))}
+      </div>
+    </>
   );
+}
+
+async function FeaturedStudiosContent() {
+  const studios = await getFeaturedStudios();
+  return <FeaturedStudios allStudios={studios} />;
 }
 
 export default function Home() {
   return (
     <>
       <main className="flex flex-1 flex-col">
-      <HeroSlider />
+        <HeroSlider />
 
-      <section className="border-b border-current/10 bg-white/60 dark:bg-zinc-950/40">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-current/10 px-4 lg:grid-cols-4">
-          {[
-            ["2,400+", "Creative spaces"],
-            ["38", "Cities and counting"],
-            ["4.9 / 5", "Average studio rating"],
-            ["24 / 7", "Creator support"],
-          ].map(([value, label], index) => (
-            <div
-              key={label}
-              className={`px-3 py-7 sm:px-7 sm:py-8 ${
-                index > 1 ? "border-t border-current/10 lg:border-t-0" : ""
-              }`}
-            >
-              <p className="text-2xl font-bold tracking-tight sm:text-3xl">
-                {value}
-              </p>
-              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] opacity-60">
-                {label}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:py-20">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">
-              Handpicked this week
-            </p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-              Featured studios
-            </h2>
-            <p className="mt-2 max-w-xl text-sm opacity-70">
-              Top-rated spaces with the light, gear, and room to make something
-              worth keeping.
-            </p>
+        <section className="border-b border-current/10 bg-white/60 dark:bg-zinc-950/40">
+          <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-current/10 px-4 lg:grid-cols-4">
+            {[
+              ["2,400+", "Creative spaces"],
+              ["38", "Cities and counting"],
+              ["4.9 / 5", "Average studio rating"],
+              ["24 / 7", "Creator support"],
+            ].map(([value, label], index) => (
+              <div
+                key={label}
+                className={`px-3 py-7 sm:px-7 sm:py-8 ${
+                  index > 1 ? "border-t border-current/10 lg:border-t-0" : ""
+                }`}
+              >
+                <AnimatedCounter
+                  value={index === 0 ? 2400 : index === 1 ? 38 : index === 2 ? 49 : 24}
+                  decimals={index === 2 ? 1 : 0}
+                  suffix={index === 2 ? "/ 5" : ""}
+                  prefix={index === 3 ? "" : ""}
+                />
+                <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] opacity-60">
+                  {label}
+                </p>
+              </div>
+            ))}
           </div>
-          <Link
-            href="/studios"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold underline decoration-amber-400 decoration-2 underline-offset-4"
-          >
-            See all studios
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-        </div>
+        </section>
 
-        <Suspense fallback={<FeaturedSkeleton />}>
-          <FeaturedStudios />
-        </Suspense>
-      </section>
-
-      <section id="explore" className="border-y border-current/10 bg-white/60 py-16 dark:bg-zinc-950/40 sm:py-20">
-        <div className="mx-auto w-full max-w-7xl px-4">
+        <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:py-20">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">
-                Find your format
+                Handpicked this week
               </p>
               <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                Browse by studio type
+                Featured studios
               </h2>
               <p className="mt-2 max-w-xl text-sm opacity-70">
-                Five categories, one place to book them all.
+                Top-rated spaces with the light, gear, and room to make something
+                worth keeping. Filter by category below.
               </p>
             </div>
             <Link
               href="/studios"
-              className="text-sm font-semibold underline decoration-amber-400 decoration-2 underline-offset-4"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold underline decoration-amber-400 decoration-2 underline-offset-4"
             >
-              View the full collection
+              See all studios
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((category) => (
-              <Link
-                key={category.name}
-                href={`/studios?category=${encodeURIComponent(category.name)}`}
-                className="group relative flex min-h-56 flex-col justify-end overflow-hidden rounded-2xl p-5 text-white"
-              >
-                <Image
-                  src={category.image}
-                  alt=""
-                  fill
-                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                  className="object-cover transition duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-                <div className="relative">
-                  <h3 className="text-xl font-semibold">{category.name}</h3>
-                  <p className="mt-1 text-sm text-white/80">
-                    {category.description}
-                  </p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-300">
-                    Explore category
-                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </span>
-                </div>
-              </Link>
-            ))}
+          <Suspense fallback={<FeaturedSkeleton />}>
+            <FeaturedStudiosContent />
+          </Suspense>
+        </section>
 
-            <div className="flex min-h-56 flex-col justify-between rounded-2xl border border-amber-400 bg-amber-50 p-6 text-black dark:bg-amber-950/30 dark:text-amber-50">
+        <section id="explore" className="border-y border-current/10 bg-white/60 py-16 dark:bg-zinc-950/40 sm:py-20">
+          <div className="mx-auto w-full max-w-7xl px-4">
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <h3 className="text-xl font-semibold">Have a space?</h3>
-                <p className="mt-1 text-sm opacity-70">
-                  Turn an empty room into income. List it in a few minutes and
-                  manage every booking from one dashboard.
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">
+                  Find your format
+                </p>
+                <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                  Browse by studio type
+                </h2>
+                <p className="mt-2 max-w-xl text-sm opacity-70">
+                  Five categories, one place to book them all.
                 </p>
               </div>
               <Link
-                href="/add-studio"
-                className="mt-6 inline-flex w-fit items-center gap-2 rounded-lg bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
+                href="/studios"
+                className="text-sm font-semibold underline decoration-amber-400 decoration-2 underline-offset-4"
               >
-                Start hosting
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:py-20">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">
-            From idea to call sheet
-          </p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-            How booking works
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed opacity-70">
-            Four clear steps between the idea in your notes app and the room
-            where it becomes real.
-          </p>
-        </div>
-
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step) => {
-            const Icon = step.icon;
-            return (
-              <article
-                key={step.number}
-                className="relative flex h-full flex-col rounded-2xl border border-current/10 bg-white p-6 dark:bg-zinc-900/60"
-              >
-                <span className="absolute right-5 top-5 text-4xl font-bold tracking-tight text-amber-400/25">
-                  {step.number}
-                </span>
-                <span className="grid h-11 w-11 place-items-center rounded-xl bg-amber-400/15 text-amber-500">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <h3 className="mt-5 text-lg font-semibold">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed opacity-70">
-                  {step.description}
-                </p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="border-y border-current/10 bg-zinc-950 py-16 text-white sm:py-20">
-        <div className="mx-auto w-full max-w-7xl px-4">
-          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-                Host guarantee & creator support
-              </p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                Book with a little less uncertainty.
-              </h2>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
-                Every confirmed booking is backed by clear standards, verified
-                people, and a support team that understands production timelines.
-              </p>
-              <Link
-                href="/how-it-works"
-                className="mt-6 inline-flex items-center gap-2 rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-amber-300"
-              >
-                Read the host guarantee
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                View the full collection
               </Link>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              {assurances.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <article
-                    key={item.title}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-5"
-                  >
-                    <Icon className="h-5 w-5 text-amber-300" aria-hidden="true" />
-                    <h3 className="mt-3 font-semibold">{item.title}</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-white/65">
-                      {item.description}
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {categories.map((category) => (
+                <Link
+                  key={category.name}
+                  href={`/studios?category=${encodeURIComponent(category.name)}`}
+                  className="group relative flex min-h-56 flex-col justify-end overflow-hidden rounded-2xl p-5 text-white"
+                >
+                  <Image
+                    src={category.image}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                  <div className="relative">
+                    <h3 className="text-xl font-semibold">{category.name}</h3>
+                    <p className="mt-1 text-sm text-white/80">
+                      {category.description}
                     </p>
-                  </article>
-                );
-              })}
+                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-300">
+                      Explore category
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                    </span>
+                  </div>
+                </Link>
+              ))}
+
+              <div className="flex min-h-56 flex-col justify-between rounded-2xl border border-amber-400 bg-amber-50 p-6 text-black dark:bg-amber-950/30 dark:text-amber-50">
+                <div>
+                  <h3 className="text-xl font-semibold">Have a space?</h3>
+                  <p className="mt-1 text-sm opacity-70">
+                    Turn an empty room into income. List it in a few minutes and
+                    manage every booking from one dashboard.
+                  </p>
+                </div>
+                <Link
+                  href="/add-studio"
+                  className="mt-6 inline-flex w-fit items-center gap-2 rounded-lg bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
+                >
+                  Start hosting
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:py-20">
-        <div className="flex flex-col items-center gap-5 rounded-3xl border border-amber-400/40 bg-amber-50 px-6 py-12 text-center dark:bg-amber-950/20">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-400 text-black">
-            <Clapperboard className="h-6 w-6" aria-hidden="true" />
-          </span>
-          <h2 className="max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
-            Your next room is one search away.
-          </h2>
-          <p className="max-w-xl text-sm leading-relaxed opacity-70">
-            Whether you are shooting a campaign, recording a season, or running a
-            workshop, find a space that fits the work.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              href="/studios"
-              className="rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
-            >
-              Explore studios
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-lg border border-current/25 px-6 py-3 text-sm font-semibold transition hover:border-amber-500"
-            >
-              Create an account
-            </Link>
+        <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">
+              From idea to call sheet
+            </p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+              How booking works
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed opacity-70">
+              Four clear steps between the idea in your notes app and the room
+              where it becomes real.
+            </p>
           </div>
-        </div>
 
-      </section>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map((step) => {
+              const Icon = step.icon;
+              return (
+                <article
+                  key={step.number}
+                  className="relative flex h-full flex-col rounded-2xl border border-current/10 bg-white p-6 dark:bg-zinc-900/60"
+                >
+                  <span className="absolute right-5 top-5 text-4xl font-bold tracking-tight text-amber-400/25">
+                    {step.number}
+                  </span>
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-amber-400/15 text-amber-500">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-5 text-lg font-semibold">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed opacity-70">
+                    {step.description}
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+        </section>
 
-      <HowItWorksSection />
-      <AboutSection />
-      <ActiveSectionTracker />
-      </main>
+        <section className="border-y border-current/10 bg-zinc-950 py-16 text-white sm:py-20">
+          <div className="mx-auto w-full max-w-7xl px-4">
+            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  Host guarantee & creator support
+                </p>
+                <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                  Book with a little less uncertainty.
+                </h2>
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
+                  Every confirmed booking is backed by clear standards, verified
+                  people, and a support team that understands production timelines.
+                </p>
+                <Link
+                  href="/how-it-works"
+                  className="mt-6 inline-flex items-center gap-2 rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-amber-300"
+                >
+                  Read the host guarantee
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {assurances.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <article
+                      key={item.title}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-5"
+                    >
+                      <Icon className="h-5 w-5 text-amber-300" aria-hidden="true" />
+                      <h3 className="mt-3 font-semibold">{item.title}</h3>
+                      <p className="mt-1.5 text-sm leading-relaxed text-white/65">
+                        {item.description}
+                      </p>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:py-20">
+          <div className="flex flex-col items-center gap-5 rounded-3xl border border-amber-400/40 bg-amber-50 px-6 py-12 text-center dark:bg-amber-950/20">
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-400 text-black">
+              <Clapperboard className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <h2 className="max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+              Your next room is one search away.
+            </h2>
+            <p className="max-w-xl text-sm leading-relaxed opacity-70">
+              Whether you are shooting a campaign, recording a season, or running a
+              workshop, find a space that fits the work.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link
+                href="/studios"
+                className="rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
+              >
+                Explore studios
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-lg border border-current/25 px-6 py-3 text-sm font-semibold transition hover:border-amber-500"
+              >
+                Create an account
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <HowItWorksSection />
+        <AboutSection />
+        <ActiveSectionTracker />
+        </main>
     </>
   );
 }

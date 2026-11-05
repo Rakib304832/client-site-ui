@@ -1,182 +1,272 @@
-# StudioSpace
+# 🏢 StudioSpace
+
 **Creative spaces, booked by the hour.**
 
 StudioSpace is a peer-to-peer marketplace for photo studios, film stages, podcast lounges, music suites, and workshops. Hosts publish the rooms they know; creators discover them, compare the details, and reserve the hours they need.
 
-![StudioSpace Banner](https://res.cloudinary.com/demo/image/upload/v1654321234/banner-studiospace.png#center)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-38BDF8?logo=tailwind-css)](https://tailwindcss.com/)
+[![Better Auth](https://img.shields.io/badge/Better%20Auth-1.7-purple)](https://better-auth.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-6-green?logo=mongodb)](https://www.mongodb.com/)
+
+---
 
 ## 🚀 Live Deployment
 
-**Client (Vercel):** https://studio-space-client.vercel.app
-**Server (Render):** https://studio-space-api.onrender.com
+| Service | URL |
+|---------|-----|
+| **Client (Vercel)** | https://studio-space-client.vercel.app |
+| **Server (Render)** | https://studio-space-api.onrender.com |
 
-> **Note:** Replace these URLs with your actual deployed domains after deployment.
+> Replace these URLs with your own deployed domains after deployment.
+
+---
+
+## 📖 Table of Contents
+
+- [✨ Features](#-features)
+- [🛠 Tech Stack](#-tech-stack)
+- [📦 Local Setup](#-local-setup)
+- [🔐 Environment Variables](#-environment-variables)
+- [🔑 Google OAuth Setup](#-google-oauth-setup)
+- [🧪 Test Credentials](#-test-credentials)
+- [🗺 Routes Overview](#-routes-overview)
+- [🔒 Protected Routes](#-protected-routes)
+- [📂 Project Structure](#-project-structure)
+- [📜 Scripts](#-scripts)
+- [🔗 Related Repository](#-related-repository)
+- [📄 License](#-license)
+
+---
 
 ## ✨ Features
 
-### Core Features
-- **Interactive Hero Slider** — Swiper.js with 3 autoplay slides, navigation, and pagination. High-res visuals with punchy headlines and primary CTA buttons ("Explore Studios" / "Host Your Space").
-- **Dynamic Featured Studios** — Fetches 6 top-rated studios from MongoDB with `.limit(6)`. Each card displays image, category badge, title, hourly rate ($XX / hr), rating badge, location, and "View Details" button.
-- **Category Browsing** — Interactive category cards (Photo Studios, Sound Stages, Podcast Rooms, Music Suites, Art Workshops). Clicking any category redirects to `/studios` with that category pre-selected.
-- **4-Step Booking Workflow** — Animated section showing: 1. Discover Spaces → 2. Select Shoot Hours → 3. Book Instantly → 4. Create & Produce.
-- **Host Guarantee & Creator Support** — 4 platform assurances: liability protection, verified profiles, equipment safety, and 24/7 host support.
+### Core marketplace
 
-### Authentication
-- **Login Page** — Email/password form with Google OAuth button. Shows error toast on failed login. Has register link and "Forgot password" info.
-- **Register Page** — Name, email, photo URL, password with validation (6+ chars, uppercase, lowercase). Success navigates to login page. Has login link and Google sign-up button.
-- **Password Validation** — Real-time error display for: minimum 6 characters, must have uppercase letter, must have lowercase letter.
-- **Google OAuth** — Sign in/up with Google, navigates to home page on success.
+- **Interactive Hero Slider** — Swiper.js with 3 autoplay slides, navigation, pagination, and primary/secondary CTAs.
+- **Featured Studios** — Top-rated studios fetched from MongoDB, with client-side category filter chips (no page reload) and a per-card **favorite/like toggle**.
+- **Animated Stats** — Count-up counters for spaces, cities, rating, and support hours.
+- **Explore Studios** — Grid view with real-time search, category/price/capacity filters, sorting, and clear-all filters.
+- **Studio Details** — Image gallery carousel (Swiper), amenities, host details, reviews, and a **booking modal** (date, time, hours, guests, price breakdown).
+- **4-Step Booking Workflow** — Discover → Select hours → Book instantly → Create & produce.
+- **Host Guarantee** — Liability protection, verified profiles, equipment safety, 24/7 host support.
 
-### CRUD Operations
-- **Add Studio** — Private route `/add-studio`. Full form with title, category select, hourly rate, security deposit, max capacity, location, image URL, amenities checklist, detailed overview. Success toast + redirect to `/my-listings`.
-- **Explore Studios** — Grid view listing all workspaces with title, category badge, hourly rate, location, rating, and "View Details" button. Supports category filtering and search.
-- **Studio Details** — Full specifications, image gallery carousel (Swiper), amenity list, host details, reviews, and "Book Workspace Now" button launching booking modal.
-- **My Studio Listings** — Protected route `/my-listings`. Table/card format showing user-owned spaces (ownerEmail match) with Update and Delete buttons. Delete shows confirmation modal before removing from MongoDB.
-- **Update Studio** — Private route `/studios/edit/[id]`. Pre-filled form with existing data. Read-only host info. On submit, updates MongoDB via PATCH and shows success toast before redirecting to `/my-listings`.
-- **My Bookings** — Private route `/my-bookings`. Displays reservations with status badges (Pending, Confirmed, Completed, Cancelled). "Cancel Booking" option for pending slots.
+### Authentication (Better Auth)
 
-### UI/UX Design
-- **Theme Toggle** — Light/dark mode switch that persists in `localStorage` and applies `data-theme` attribute to `<html>` element for full system theming.
-- **X Logo** — Used throughout (not old Twitter bird). Features in header, footer, newsletter, and category cards.
-- **Sonner Toast Notifications** — Standardized feedback across all CRUD, auth, and booking actions. No default alert() calls.
-- **Custom 404 Page** — Creative studio illustration with "Return to Home" button.
-- **Branded Skeleton Loaders** — Animated spinners during route transitions and asynchronous data fetches.
-- **Empty States** — Friendly displays with CTA buttons when search returns no results or booking lists are empty.
-- **Responsive Design** — Fully responsive for mobile, tablet, and desktop views.
-- **Sticky Header** — Active route indicators, authenticated profile dropdown with Dashboard, Add New Studio, My Studio Listings, My Bookings, and Logout.
+- **Login** — Email/password form + Google OAuth. Clear errors and a hint when an account was created via Google.
+- **Register** — Name, email, photo URL, password with live validation (6+ chars, upper/lower case).
+- **Google OAuth** — Sign in/up with Google, redirects home on success.
+- **Session guard** — Protected routes wait for the session to hydrate, so a page reload never kicks out a logged-in user.
 
-### Tech Stack
+### Host tools (protected routes)
+
+- **Add Studio** — Full listing form: title, category, hourly rate, security deposit, capacity, location, image URL, amenities, overview.
+- **My Listings** — Manage your own spaces with update/delete (confirmation modal).
+- **Update Studio** — Pre-filled edit form; PATCH updates to MongoDB.
+- **My Bookings** — Guest and host reservations with status badges (Pending, Confirmed, Completed, Cancelled) and cancel option.
+
+### UI/UX
+
+- **Theme toggle** — Light/dark mode persisted in `localStorage`, applied before paint.
+- **Sonner toasts** — Standardized feedback across auth, CRUD, and booking actions.
+- **Scroll-to-top** — Floating button that appears after scrolling.
+- **Skeleton loaders** — Branded animated placeholders during data fetches.
+- **Empty states** — Friendly displays with CTAs when results are empty.
+- **Responsive** — Mobile, tablet, and desktop.
+- **Sticky header** — Active route indicators, authenticated profile dropdown.
+
+---
+
+## 🛠 Tech Stack
 
 | Layer | Technology |
-| --- | --- |
-| **Framework** | Next.js 14 (App Router, Turbopack, React 19) |
-| **Language** | TypeScript |
-| **UI** | Tailwind CSS 4, Daisy UI, Shadcn UI components |
-| **Icons** | Lucide React |
-| **Carousel** | Swiper.js (3 interactive slides) |
-| **Notifications** | Sonner (replace default alerts) |
-| **Auth** | Better Auth with MongoDB adapter, Google OAuth |
-| **API** | Express 5 + MongoDB (separate repository) |
-| **Images** | ImgBB upload with direct URL fallback |
-| **Fonts** | Geist Sans + Geist Mono via `next/font` |
-| **Animations** | Framer Motion (for skeletons and transitions) |
+|-------|------------|
+| Framework | Next.js 16 (App Router, Turbopack, React 19) |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS 4, DaisyUI |
+| Icons | Lucide React |
+| Carousel | Swiper.js |
+| Notifications | Sonner |
+| Auth | Better Auth + MongoDB adapter, Google OAuth |
+| API | Express 5 + MongoDB (separate repo) |
+| Images | ImgBB upload (optional) |
+| Fonts | Geist Sans + Geist Mono (`next/font`) |
+| State | React hooks (`useState`, `useEffect`, `useMemo`) |
 
-### 📦 Local Setup
+---
 
-#### 1. Start the API
+## 📦 Local Setup
+
+### 1. Start the API (server)
+
 ```bash
 cd ../server-site
 npm install
-cp .env.example .env   # or create .env with your values
-npm run seed           # seeds studios and demo examiner account
+cp .env.example .env   # fill in your values
+npm run seed           # seeds studios and demo account
 npm run dev            # http://localhost:5000
 ```
-*The API needs `MONGODB_URI`, `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL=http://localhost:3000`. Google sign-in also needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.*
 
-#### 2. Start the Client
+### 2. Start the client
+
 ```bash
 npm install
-cp .env.example .env.local
-npm run dev            # http://localhost:3000
+cp .env.example .env.local   # or use the provided .env
+npm run dev                  # http://localhost:3000
 ```
-*Required environment variables:*
-- `NEXT_PUBLIC_API_URL=http://localhost:5000`
-- `BETTER_AUTH_URL=http://localhost:3000`
-- `BETTER_AUTH_SECRET=your-secret`
-- `MONGODB_URI=your-mongodb-uri`
-- `GOOGLE_CLIENT_ID=optional`
-- `GOOGLE_CLIENT_SECRET=optional`
-- `NEXT_PUBLIC_IMGBB_API_KEY=optional` *(enables studio image upload)*
 
-#### 3. Google OAuth Redirect URI
-Add this authorized redirect URI in Google Cloud Console:
+---
+
+## 🔐 Environment Variables
+
+Create `.env.local` in the client root:
+
+```env
+# Express API
+NEXT_PUBLIC_API_URL=http://localhost:5000
+
+# Better Auth
+BETTER_AUTH_SECRET=your-generated-secret
+BETTER_AUTH_URL=http://localhost:3000
+
+# Database
+MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/studiospace
+
+# Google OAuth (optional — enables Google sign-in)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Image upload (optional — enables studio image upload)
+NEXT_PUBLIC_IMGBB_API_KEY=your-imgbb-key
+```
+
+Generate a secret with:
+
+```bash
+openssl rand -base64 32
+```
+
+---
+
+## 🔑 Google OAuth Setup
+
+In **Google Cloud Console → APIs & Services → Credentials → your OAuth 2.0 Client ID**, add this **Authorized redirect URI**:
+
 ```
 http://localhost:3000/api/auth/callback/google
 ```
 
-### 🧪 Examiner Test Credentials
+---
+
+## 🧪 Test Credentials
 
 | Field | Value |
-| --- | --- |
-| **Email** | `examiner@studiospace.demo` |
-| **Password** | `Studio123` |
+|-------|-------|
+| Email | `examiner@studiospace.demo` |
+| Password | `Studio123` |
 
-*The demo account is created by `npm run seed`. You can also register a new account from `/register` — email verification is intentionally disabled for this assignment.*
+Created by `npm run seed` on the server. You can also register a new account from `/register` (email verification is disabled for this demo).
 
-### 📚 Routes Overview
+---
 
-| Route | Description |
-| --- | --- |
-| `/` | Home page with hero slider, featured studios, categories, 4-step booking workflow, host guarantee, and host CTA |
-| `/studios` | Explore and filter studios with category tabs, search, and sort options |
-| `/studios/[id]` | Studio details with gallery carousel, amenities, host profile, and booking button |
-| `/studios/edit/[id]` | Edit a listing (protected — owner only) |
-| `/add-studio` | Publish a new studio listing (protected) |
-| `/my-listings` | Host listing management (protected) |
-| `/my-bookings` | Guest and host booking management (protected) |
-| `/dashboard` | Host and creator overview (protected) |
-| `/how-it-works` | Creator and host guide, FAQ, and support |
-| `/about` | Mission, values, terms, and privacy |
-| `/login` | Email/password and Google login |
-| `/register` | Account creation with photo URL and password validation |
-| `not-found.tsx` | Custom 404 illustration with "Return to Home" |
+## 🗺 Routes Overview
 
-### ⚠️ Security & Challenge Notes
+| Route | Description | Auth |
+|-------|-------------|------|
+| `/` | Home: hero slider, stats, featured studios, categories, booking steps | Public |
+| `/studios` | Explore + filter + sort all studios | Public |
+| `/studios/[id]` | Studio details: gallery, amenities, booking modal | Public |
+| `/add-studio` | Publish a new studio listing | Private |
+| `/studios/edit/[id]` | Edit a listing (owner only) | Private |
+| `/my-listings` | Host listing management | Private |
+| `/my-bookings` | Guest + host booking management | Private |
+| `/dashboard` | Host/creator overview | Private |
+| `/how-it-works` | Creator/host guide and FAQ | Public |
+| `/about` | Mission, terms, privacy | Public |
+| `/login` | Email/password + Google login | Public |
+| `/register` | Account creation | Public |
 
-- **HTTP-only Sessions** — Better Auth stores the session in an HTTP-only cookie. The Express API verifies it on every protected mutation.
-- **Double-Booking Prevention** — `POST /api/bookings` checks for overlapping `Pending` or `Confirmed` reservations with a MongoDB range query (`$lt`/`$gt` operators) before inserting. Returns 409 with clear error message.
-- **Ownership Checks** — Only the host can edit/delete a studio or confirm/complete a booking.
-- **Theme Customization** — The header toggle persists the choice in `localStorage`, applies `data-theme` and the `dark` class before paint, and restyles the full app.
-- **JWT Security** — JWT stored in HTTP-only cookie, rejected with 401 on unauthorized mutations.
+---
 
-### 📦 Scripts
+## 🔒 Protected Routes
 
-```bash
-npm run dev       # Start the development server
-npm run build     # Production build
-npm run start     # Serve the production build
-npm run lint      # ESLint
-```
+The following routes require a logged-in session:
 
-### 📂 Project Structure
+- `/add-studio`
+- `/my-listings`
+- `/studios/edit/[id]`
+- `/my-bookings`
+- `/dashboard`
+
+Each protected page reads the session via `authClient.useSession()` and waits for it to resolve (`isPending`) before redirecting. This means a logged-in user who refreshes the page is **not** sent to `/login` mid-hydration. Unauthenticated users are redirected to `/login?from=<current-path>` so they can return after signing in.
+
+Public pages (Home, `/studios`, `/studios/[id]`, `/how-it-works`, `/about`, `/login`, `/register`) remain viewable without logging in.
+
+---
+
+## 📂 Project Structure
 
 ```
 src/
 ├── app/
-│   ├── (auth)/              # Login, register, shared auth layout
-│   ├── about/               # About, terms, privacy
-│   ├── add-studio/          # Create listing (protected)
-│   ├── api/auth/[...all]/   # Better Auth route handler
-│   ├── components/          # Header, footer, studio, booking, UI
-│   ├── dashboard/           # Host/creator overview (protected)
-│   ├── hooks/               # Theme hook useThemets.ts
-│   ├── how-it-works/        # Creator/host guide
-│   ├── my-bookings/         # Guest + host bookings (protected)
-│   ├── my-listings/         # Host listings (protected)
-│   ├── studios/             # Explore, details, edit
-│   ├── layout.tsx           # Global shell with theme toggle, X logo, sticky header
-│   └── page.tsx             # Home
-├── components/
-│   ├── ui/                  # EmptyState, ConfirmDialog, etc.
-│   ├── home/                # HeroSlider, HowItWorksSection, AboutSection
-│   ├── studio/              # StudioCard, StudioForm, GalleryCarousel, BookWorkspaceButton
-│   ├── site-header.tsx      # Sticky header with theme toggle
-│   ├── site-footer.tsx      # Footer with X logo, newsletter, categories
-│   └── theme-toggle.tsx     # Light/dark mode switch
+│   ├── (auth)/                 # Login, register, shared auth layout
+│   ├── about/                  # About, terms, privacy
+│   ├── add-studio/             # Create listing (protected)
+│   ├── api/auth/[...all]/      # Better Auth route handler
+│   ├── components/
+│   │   ├── ui/                 # EmptyState, ConfirmDialog, AnimatedCounter, ScrollToTop
+│   │   ├── home/               # HeroSlider, HowItWorksSection, AboutSection
+│   │   ├── studio/             # StudioCard, StudioForm, GalleryCarousel, BookWorkspaceButton
+│   │   ├── site-header.tsx     # Sticky header with theme toggle + profile menu
+│   │   ├── site-footer.tsx     # Footer, social links, newsletter
+│   │   ├── theme-toggle.tsx    # Light/dark mode switch
+│   │   └── google-auth-button.tsx
+│   ├── dashboard/              # Host/creator overview (protected)
+│   ├── hooks/                  # Theme hook (useThemets)
+│   ├── how-it-works/           # Creator/host guide
+│   ├── my-bookings/            # Guest + host bookings (protected)
+│   ├── my-listings/            # Host listings (protected)
+│   ├── studios/                # Explore, details, edit
+│   ├── layout.tsx              # Global shell: header, scroll-to-top, footer, toaster
+│   └── page.tsx                # Home
 ├── lib/
-│   ├── api.ts             # API fetch with credentials: "include"
-│   ├── auth.ts            # Better Auth client instance
-│   ├── auth-client.ts     # authClient export
-│   ├── upload.ts          # ImgBB upload function
-│   └── type.ts            # Shared type definitions
-└── types/
-    └── studio.tsx         # Studio and Booking types
+│   ├── api.ts                  # API fetch with credentials: "include"
+│   ├── auth.ts                 # Better Auth server instance
+│   ├── auth-client.ts          # authClient export (Better Auth client)
+│   ├── redirect.ts             # Safe redirect-path helper
+│   ├── upload.ts               # ImgBB upload helper
+│   └── type.ts                 # Shared type definitions
+├── types/
+│   └── studio.tsx              # Studio, Booking, Review types + STUDIO_CATEGORIES
+├── globals.css                 # Tailwind, custom vars, dark mode, animations
+└── layout.tsx                  # Root layout, theme script, fonts
 ```
 
-### 📫 Related Repository
+---
+
+## 📜 Scripts
+
+```bash
+npm run dev      # Start the development server (Turbopack)
+npm run build    # Production build
+npm run start    # Serve the production build
+npm run lint     # Run ESLint
+```
+
+---
+
+## 🔗 Related Repository
 
 - **Server:** https://github.com/Rakib304832/server-site
-- **Client:** https://github.com/Rakib304832/client-side1
+- **Client (this repo):** https://github.com/Rakib304832/client-site-ui
+
+---
+
+## 📄 License
+
+MIT
 
 ---
 
