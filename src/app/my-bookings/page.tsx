@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CalendarDays, RotateCcw, Users } from "lucide-react";
 import { ApiError, apiFetch } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
 import type { Booking, BookingStatus } from "@/app/types/studio";
 import SafeImage from "@/app/components/SafeImage";
 import ConfirmDialog from "@/app/components/ui/confirm-dialog";
+import EmptyState from "@/app/components/ui/empty-state";
 
 const STATUS_STYLES: Record<BookingStatus, string> = {
   Pending: "bg-amber-100 text-amber-800 border-amber-300",
@@ -174,6 +176,7 @@ function BookingCard({
 
 export default function MyBookingsPage() {
   const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
   const [guestBookings, setGuestBookings] = useState<Booking[]>([]);
   const [hostBookings, setHostBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -186,6 +189,14 @@ export default function MyBookingsPage() {
 
   useEffect(() => {
     let cancelled = false;
+
+    // Require login. Wait for the session to resolve so a page reload does not
+    // redirect a logged-in user to /login before hydration finishes.
+    if (isPending) return;
+    if (!session?.user) {
+      router.replace("/login?from=%2Fmy-bookings");
+      return;
+    }
 
     Promise.all([
       apiFetch<Booking[]>("/api/bookings?scope=guest"),
@@ -216,7 +227,7 @@ export default function MyBookingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [reloadKey, router]);
+  }, [isPending, reloadKey, router, session]);
 
   async function handleStatusChange(booking: Booking, status: BookingStatus) {
     setUpdatingId(booking._id);
@@ -282,7 +293,10 @@ export default function MyBookingsPage() {
         ).length;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10">
+    <main
+      className="mx-auto max-w-5xl px-4 py-10"
+      aria-busy={loading}
+    >
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">My Bookings</h1>
@@ -337,11 +351,14 @@ export default function MyBookingsPage() {
       ) : null}
 
       {loading ? (
-        <div className="space-y-4">
+        <div className="space-y-4" aria-busy="true">
+          <p role="status" className="sr-only">
+            Loading bookings...
+          </p>
           {Array.from({ length: 2 }).map((_, index) => (
             <div
               key={index}
-              className="h-40 animate-pulse rounded-2xl bg-current/10"
+              className="h-40 animate-pulse rounded-2xl bg-amber-400/10"
             />
           ))}
         </div>
@@ -361,29 +378,34 @@ export default function MyBookingsPage() {
           </button>
         </div>
       ) : totalBookings === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed p-12 text-center">
-          <p className="text-lg font-medium">No bookings yet.</p>
-          <p className="max-w-md text-sm opacity-70">
-            Book a studio to see your requests here, or share your listing so guests
-            can book your space.
-          </p>
-          <Link
-            href="/studios"
-            className="rounded-lg bg-amber-400 px-5 py-2.5 font-semibold text-black"
-          >
-            Find a studio
-          </Link>
-        </div>
+        <EmptyState
+          icon={CalendarDays}
+          title="No bookings yet"
+          description="Book a studio to see your requests here, or list your space so guests can book with you."
+          actionLabel="Explore studios"
+          actionHref="/studios"
+        />
       ) : (
         <div className="space-y-10">
           <section>
             <h2 className="mb-4 text-xl font-semibold">My booking requests</h2>
             {filteredGuestBookings.length === 0 ? (
-              <p className="rounded-xl border border-dashed p-6 text-sm opacity-70">
-                {filter === "All"
-                  ? "You have not booked a studio yet."
-                  : `No ${filter.toLowerCase()} booking requests.`}
-              </p>
+              <EmptyState
+                icon={CalendarDays}
+                title={
+                  filter === "All"
+                    ? "No booking requests yet"
+                    : `No ${filter.toLowerCase()} requests`
+                }
+                description={
+                  filter === "All"
+                    ? "Find a creative space for your next shoot, recording, or workshop."
+                    : "Try another status filter to see more of your requests."
+                }
+                actionLabel={filter === "All" ? "Explore studios" : "Show all bookings"}
+                actionHref={filter === "All" ? "/studios" : undefined}
+                onAction={filter === "All" ? undefined : () => setFilter("All")}
+              />
             ) : (
               <div className="space-y-4">
                 {filteredGuestBookings.map((booking) => (
@@ -405,11 +427,22 @@ export default function MyBookingsPage() {
               Bookings for my studios
             </h2>
             {filteredHostBookings.length === 0 ? (
-              <p className="rounded-xl border border-dashed p-6 text-sm opacity-70">
-                {filter === "All"
-                  ? "No guests have booked your studios yet."
-                  : `No ${filter.toLowerCase()} bookings for your studios.`}
-              </p>
+              <EmptyState
+                icon={CalendarDays}
+                title={
+                  filter === "All"
+                    ? "No studio bookings yet"
+                    : `No ${filter.toLowerCase()} studio bookings`
+                }
+                description={
+                  filter === "All"
+                    ? "List a creative space to start receiving booking requests."
+                    : "Try another status filter to see more host bookings."
+                }
+                actionLabel={filter === "All" ? "List a studio" : "Show all bookings"}
+                actionHref={filter === "All" ? "/add-studio" : undefined}
+                onAction={filter === "All" ? undefined : () => setFilter("All")}
+              />
             ) : (
               <div className="space-y-4">
                 {filteredHostBookings.map((booking) => (

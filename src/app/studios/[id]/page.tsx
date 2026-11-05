@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { CalendarCheck, MessageSquare, Star } from "lucide-react";
+import { Aperture, CalendarCheck, MessageSquare, Star } from "lucide-react";
 import type { Studio } from "@/app/types/studio";
 import GalleryCarousel from "@/app/components/studio/GalleryCarousel";
 import BookWorkspaceButton from "@/app/components/studio/booking/BookWorkspaceButton";
@@ -192,10 +192,19 @@ export default async function StudioDetailsPage({
   return (
     <Suspense
       fallback={
-        <p role="status" className="mx-auto max-w-6xl px-4 py-10">
-          Loading studio details...
-        </p>
-       }
+        <main
+          aria-busy="true"
+          className="mx-auto flex min-h-64 max-w-6xl flex-col items-center justify-center gap-3 px-4 py-10"
+        >
+          <Aperture
+            className="h-8 w-8 animate-spin text-amber-500"
+            aria-hidden="true"
+          />
+          <p role="status" className="text-sm font-medium">
+            Loading studio details...
+          </p>
+        </main>
+      }
     >
       <StudioDetails id={id} />
     </Suspense>

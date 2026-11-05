@@ -87,11 +87,23 @@ export default function SiteHeader() {
   };
 
   const signOut = async () => {
-    await authClient.signOut();
-    toast.success("You have been signed out.");
-    closeMenus();
-    router.push("/");
-    router.refresh();
+    try {
+      const { error } = await authClient.signOut();
+      if (error) {
+        toast.error(error.message ?? "Could not sign out. Please try again.");
+        return;
+      }
+      toast.success("You have been signed out.");
+      closeMenus();
+      router.push("/");
+      router.refresh();
+    } catch (signOutError) {
+      toast.error(
+        signOutError instanceof Error
+          ? signOutError.message
+          : "Could not sign out. Please try again.",
+      );
+    }
   };
 
   return (

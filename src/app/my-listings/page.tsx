@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { ApiError, apiFetch } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
 import type { Studio } from "@/app/types/studio";
 import SafeImage from "@/app/components/SafeImage";
 import ConfirmDialog from "@/app/components/ui/confirm-dialog";
@@ -19,6 +20,7 @@ import EmptyState from "@/app/components/ui/empty-state";
 
 export default function MyListingsPage() {
   const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
   const [studios, setStudios] = useState<Studio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +30,14 @@ export default function MyListingsPage() {
 
   useEffect(() => {
     let cancelled = false;
+
+    // Require login. Wait for the session to resolve so a page reload does not
+    // redirect a logged-in user to /login before hydration finishes.
+    if (isPending) return;
+    if (!session?.user) {
+      router.replace("/login?from=%2Fmy-listings");
+      return;
+    }
 
     apiFetch<Studio[]>("/api/studios?mine=true")
       .then((data) => {
@@ -54,7 +64,7 @@ export default function MyListingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [reloadKey, router]);
+  }, [isPending, reloadKey, router, session]);
 
   async function handleDelete() {
     if (!pendingDelete) return;
@@ -113,11 +123,17 @@ export default function MyListingsPage() {
       </div>
 
       {loading ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          aria-busy="true"
+        >
+          <p role="status" className="sr-only">
+            Loading your studio listings...
+          </p>
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="aspect-[4/3] animate-pulse rounded-2xl bg-current/10"
+              className="aspect-[4/3] animate-pulse rounded-2xl bg-amber-400/10"
             />
           ))}
         </div>

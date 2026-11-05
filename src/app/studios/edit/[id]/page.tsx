@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ApiError, apiFetch } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
 import type { Studio } from "@/app/types/studio";
 import StudioForm, {
   type StudioFormValues,
@@ -17,6 +18,7 @@ function EditStudioPageContent({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
 
   const [studio, setStudio] = useState<Studio | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -24,6 +26,14 @@ function EditStudioPageContent({
 
   useEffect(() => {
     let cancelled = false;
+
+    // Require login. Wait for the session to resolve so a page reload does not
+    // redirect a logged-in user to /login before hydration finishes.
+    if (isPending) return;
+    if (!session?.user) {
+      router.replace(`/login?from=${encodeURIComponent(`/studios/edit/${id}`)}`);
+      return;
+    }
 
     apiFetch<Studio>(`/api/studios/${encodeURIComponent(id)}`)
       .then((data) => {
@@ -48,7 +58,7 @@ function EditStudioPageContent({
     return () => {
       cancelled = true;
     };
-  }, [id, reloadKey, router]);
+  }, [id, isPending, reloadKey, router, session]);
 
   async function handleSubmit(values: StudioFormValues) {
     await apiFetch<Studio>(`/api/studios/${encodeURIComponent(id)}`, {
@@ -105,10 +115,10 @@ function EditStudioPageContent({
         <p role="status" className="sr-only">
           Loading studio editor...
         </p>
-        <div className="mb-8 h-8 w-1/2 rounded bg-current/10" />
+        <div className="mb-8 h-8 w-1/2 rounded bg-amber-400/10" />
         <div className="space-y-4">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-11 rounded bg-current/10" />
+            <div key={index} className="h-11 rounded bg-amber-400/10" />
           ))}
         </div>
       </main>

@@ -27,25 +27,35 @@ function RegisterForm() {
     setLoading(true);
 
     const formData = new FormData(event.currentTarget);
-    const { error } = await authClient.signUp.email({
-      name: String(formData.get("name")),
-      email: String(formData.get("email")),
-      password: String(formData.get("password")),
-      image: image.trim() || undefined,
-    });
+    try {
+      const { error } = await authClient.signUp.email({
+        name: String(formData.get("name")),
+        email: String(formData.get("email")),
+        password: String(formData.get("password")),
+        image: image.trim() || undefined,
+      });
 
-    setLoading(false);
-    if (error) {
+      if (error) {
+        const message =
+          error.message ?? "We could not create your account. Please try again.";
+        setServerError(message);
+        toast.error(message);
+        return;
+      }
+
+      toast.success("Account created. Sign in to start booking studios.");
+      router.push(`/login?from=${encodeURIComponent(from)}`);
+      router.refresh();
+    } catch (registerError) {
       const message =
-        error.message ?? "We could not create your account. Please try again.";
+        registerError instanceof Error
+          ? registerError.message
+          : "We could not create your account. Please try again.";
       setServerError(message);
       toast.error(message);
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    toast.success("Account created. Sign in to start booking studios.");
-    router.push(`/login?from=${encodeURIComponent(from)}`);
-    router.refresh();
   };
 
   return (

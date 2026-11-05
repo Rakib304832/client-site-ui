@@ -56,13 +56,13 @@ function StudiosSkeleton() {
       <p role="status" className="sr-only">
         Loading studios...
       </p>
-      <div className="mb-8 h-10 w-64 animate-pulse rounded-lg bg-current/10" />
-      <div className="mb-8 h-40 animate-pulse rounded-2xl bg-current/5" />
+      <div className="mb-8 h-10 w-64 animate-pulse rounded-lg bg-amber-400/10" />
+      <div className="mb-8 h-40 animate-pulse rounded-2xl bg-amber-400/5" />
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
-            className="aspect-[4/3] animate-pulse rounded-2xl bg-current/10"
+            className="aspect-[4/3] animate-pulse rounded-2xl bg-amber-400/10"
           />
         ))}
       </div>

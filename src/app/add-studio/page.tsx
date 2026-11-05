@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ApiError, apiFetch } from "@/lib/api";
@@ -11,7 +12,26 @@ import StudioForm, {
 
 export default function AddStudioPage() {
   const router = useRouter();
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
+
+  // Require login. Wait for the session to resolve so a page reload does not
+  // redirect a logged-in user to /login before hydration finishes.
+  useEffect(() => {
+    if (isPending) return;
+    if (!session?.user) {
+      router.replace(`/login?from=${encodeURIComponent("/add-studio")}`);
+      return;
+    }
+  }, [isPending, session, router]);
+
+  if (isPending || !session?.user) {
+    return (
+      <main className="mx-auto w-full max-w-3xl px-4 py-10" aria-busy="true">
+        <p role="status" className="sr-only">Loading add studio...</p>
+        <div className="h-9 w-72 animate-pulse rounded-lg bg-amber-400/10" />
+      </main>
+    );
+  }
 
   async function handleSubmit(values: StudioFormValues) {
     try {
@@ -58,11 +78,10 @@ export default function AddStudioPage() {
         <StudioForm
           submitLabel="Publish Studio"
           onSubmit={handleSubmit}
-          host={
-            session?.user
-              ? { name: session.user.name, email: session.user.email }
-              : null
-          }
+          host={{
+            name: session.user.name,
+            email: session.user.email,
+          }}
           onCancel={() => router.push("/studios")}
         />
       </div>

@@ -24,22 +24,42 @@ function LoginForm() {
     setLoading(true);
 
     const formData = new FormData(event.currentTarget);
-    const { error } = await authClient.signIn.email({
-      email: String(formData.get("email")),
-      password: String(formData.get("password")),
-    });
+    try {
+      const { error } = await authClient.signIn.email({
+        email: String(formData.get("email")),
+        password: String(formData.get("password")),
+      });
 
-    setLoading(false);
-    if (error) {
-      const message = error.message ?? "Login failed. Check your details and try again.";
+      if (error) {
+        const message =
+          error.message ?? "Login failed. Check your details and try again.";
+        setServerError(message);
+        toast.error(message);
+        if (
+          message.toLowerCase().includes("invalid") ||
+          message.toLowerCase().includes("credentials") ||
+          message.toLowerCase().includes("not found")
+        ) {
+          toast.info(
+            "If you signed up with Google, use 'Login with Google' instead, or create a new account.",
+          );
+        }
+        return;
+      }
+
+      toast.success("Welcome back. Your studio desk is ready.");
+      router.push(from);
+      router.refresh();
+    } catch (loginError) {
+      const message =
+        loginError instanceof Error
+          ? loginError.message
+          : "Login failed. Check your details and try again.";
       setServerError(message);
       toast.error(message);
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    toast.success("Welcome back. Your studio desk is ready.");
-    router.push(from);
-    router.refresh();
   };
 
   function forgotPassword() {
