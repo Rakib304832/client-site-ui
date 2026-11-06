@@ -41,6 +41,7 @@ const trustedOrigins = [
     "https://client-site-ui-git-main-rakib-299e.vercel.app",
     "https://client-site-ui-git-*-rakib-299e.vercel.app",
     "https://client-site-*-rakib-299e.vercel.app",
+    "https://client-site-607thl2rj-rakib-299e.vercel.app",
     ...vercelOrigins,
     ...clientOrigins,
   ]),
