@@ -130,6 +130,7 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 # Better Auth
 BETTER_AUTH_SECRET=your-generated-secret
 BETTER_AUTH_URL=http://localhost:3000
+CLIENT_ORIGINS=http://localhost:3000
 
 # Database
 MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/studiospace

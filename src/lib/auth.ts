@@ -5,6 +5,10 @@ import { MongoClient } from "mongodb";
 const databaseUrl = process.env.MONGODB_URI as string;
 const secret = process.env.BETTER_AUTH_SECRET as string;
 const baseURL = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+const clientOrigins = (process.env.CLIENT_ORIGINS ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -22,7 +26,7 @@ export const auth = betterAuth({
   database: mongodbAdapter(db),
   secret,
   baseURL,
-  trustedOrigins: [baseURL],
+  trustedOrigins: [...new Set([baseURL, ...clientOrigins])],
   advanced: {
     useSecureCookies: process.env.NODE_ENV === "production",
   },

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -201,8 +200,22 @@ function FeaturedStudios({ allStudios }: { allStudios: Studio[] }) {
   );
 }
 
-async function FeaturedStudiosContent() {
-  const studios = await getFeaturedStudios();
+function FeaturedStudiosContent() {
+  const [studios, setStudios] = useState<Studio[] | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    void getFeaturedStudios().then((featuredStudios) => {
+      if (active) setStudios(featuredStudios);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (studios === null) return <FeaturedSkeleton />;
   return <FeaturedStudios allStudios={studios} />;
 }
 
@@ -263,9 +276,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <Suspense fallback={<FeaturedSkeleton />}>
-            <FeaturedStudiosContent />
-          </Suspense>
+          <FeaturedStudiosContent />
         </section>
 
         <section id="explore" className="border-y border-current/10 bg-white/60 py-16 dark:bg-zinc-950/40 sm:py-20">
