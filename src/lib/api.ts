@@ -1,5 +1,7 @@
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+const configuredApiUrl =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://server-site-ruby.vercel.app";
+
+export const API_URL = configuredApiUrl.replace(/\/+$/, "");
 
 export class ApiError extends Error {
   status: number;
